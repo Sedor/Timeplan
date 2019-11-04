@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "entry": "./lib/webparts/timeplan/TimeplanWebPart.js",
+      "manifest": "./src/webparts/timeplan/TimeplanWebPart.manifest.json",
+      "outputPath": "./dist/timeplan-web-part.js"
+    }
+  ],
+  "externals": {},
+  "localizedResources": {
+    "TimeplanWebPartStrings": "webparts/timeplan/loc/{locale}.js"
+  }
+}

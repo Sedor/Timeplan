@@ -1,0 +1,12 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "version": "1.9.1",
+    "libraryName": "timeplan",
+    "libraryId": "4c23b6bc-2f1d-4fa2-aacd-7858b57ea81e",
+    "environment": "onprem",
+    "packageManager": "npm",
+    "framework": "react",
+    "isCreatingSolution": true,
+    "componentType": "webpart"
+  }
+}
