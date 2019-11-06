@@ -2,51 +2,56 @@ import * as React from 'react';
 import styles from './Mainpage.module.scss';
 import { IMainPageState } from './IMainPageState';
 import { IMainPageProps } from './IMainPageProps';
-import { escape } from '@microsoft/sp-lodash-subset';
+import { Meeting } from '../../data/Meeting/Meeting';
+import { MeetingService } from '../../service/meeting-service';
+// import { Link } from 'react-router-dom';
 
 const initialState: IMainPageState = {
-    event: {
-        name: 'Tri-State Office 365 User Group',
-        location: 'Malvern, PA',
-        organizers: ['Jason', 'Michael'],
-        numOfAttendees: 33
-    }
+    meetingList: [new Meeting('3','Test','Test2')],
 }
 
 export class MainPage extends React.Component < any, IMainPageState > {
 
-    readonly state: IMainPageState = initialState;
+    state: IMainPageState = initialState;
+
+    constructor(props: any){
+      super(props);
+      MeetingService.getMeetingList().then( list => {this.setState({meetingList: list});} );
+    }
 
     public render(): React.ReactElement<IMainPageProps> {
+      MeetingService.getMeetingList().then( list => {this.state.meetingList = list;} );
         return(
         //<div className = { styles.createEvent } >
         <div className={styles.mainPage}>
         <div className={styles.container}>
         <div className={styles.row}>
           <div className={styles.column}>
-            <span className={styles.title}>Welcome to {escape(this.props.description)}!</span>
+            <span className={styles.title}>Ihre Veranstaltungen!</span>
             <table>
               <tr>
                 <th>Id</th>
                 <th>Name</th>
                 <th>Description</th>
-                <th>Owner</th>
               </tr>
-              <tr>
-                <td>1</td>
-                <td>Hans</td>
-                <td>Beschreibung blabla</td>
-                <td>Severin</td>
-              </tr>
+               {this.state.meetingList.map(meeting => {
+                 return <tr><td>{meeting.getId()}</td><td>{meeting.getTitle()}</td><td>{meeting.getDescription()}</td></tr>
+               })}
             </table>
+              {/* <Link to="/" className={styles.button}>Home
+                <span className={styles.label}>Neue Veranstaltung</span>
+              </Link> */}
             <a className={styles.button}>
-              <span className={styles.label}>Neue Veranstaltung</span>
+              <span className={styles.label}>Bearbeiten</span>
+            </a>
+            <a className={styles.button}>
+              <span className={styles.label}>Status</span>
             </a>
           </div>
         </div>
       </div>
       </div>
-        );
+      );
     }
 
 
