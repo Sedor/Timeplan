@@ -25,11 +25,11 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 <div>
                     <div>
                         <p>Veranstaltungsname: </p>
-                        <input>this.state.meetingName</input>
+                        <input type='text' name='meetingName' value={this.state.meetingName} />
                     </div>
                     <div>
                         <p>Verteilalgorithmus: </p>
-                        <input>this.state.distributionMethod</input>
+                        <input type='text' name='distributionMethod' value={this.state.distributionMethod} />
                     </div>
                 </div>
                 <div>
