@@ -9,13 +9,33 @@ const initialState: IMeetingState = {
     meetingName: "Enter Text",
     distributionMethod: "Blub",
     appointmentList: [new Appointment()],
-    invitedUserList: [new User('1','Max','Mustermann')],
+    invitedUserList: [new User('1','Max','max@mail.de')],
     activated: false,
 }
 
 export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     readonly state: IMeetingState = initialState;
+
+    public createNewAppointment():void {
+        console.log('clicked CreateNewAppointment');
+    }
+
+    public modifyAppointment():void {
+        console.log('clicked modifyAppointment');
+    }
+
+    public deleteAppointment():void {
+        console.log('clicked deleteAppointment');
+    }
+
+    public inviteUser():void {
+        console.log('clicked inviteUser');
+    }
+
+    public deleteInvitedUser():void {
+        console.log('clicked deleteInvitedUser');
+    }
 
     public render(): React.ReactElement<ICreateMeetingProps> {
         return(
@@ -53,9 +73,9 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     </table>
                 </div>
                 <div>
-                    <button>Neuer Termin</button>
-                    <button>Bearbeiten</button>
-                    <button>Loeschen</button>
+                    <button onClick={this.createNewAppointment} >Neuer Termin</button>
+                    <button onClick={this.modifyAppointment} >Bearbeiten</button>
+                    <button onClick={this.deleteAppointment} >Loeschen</button>
                 </div>
                 <div>
                     <table>
@@ -72,8 +92,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     </table>
                 </div>
                 <div>
-                    <button>Benutzer einladen</button>
-                    <button>Loeschen</button>
+                    <button onClick={this.inviteUser} >Benutzer einladen</button>
+                    <button onClick={this.deleteInvitedUser} >Loeschen</button>
                 </div>
                 <div>
                     <p>Freigeben:</p>

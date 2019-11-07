@@ -4,7 +4,7 @@ import { IMainPageState } from './IMainPageState';
 import { IMainPageProps } from './IMainPageProps';
 import { Meeting } from '../../data/Meeting/Meeting';
 import { MeetingService } from '../../service/meeting-service';
-import {withRouter} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const initialState: IMainPageState = {
     meetingList: [new Meeting('3','Test','Test2')],
@@ -13,9 +13,12 @@ const initialState: IMainPageState = {
 export class MainPage extends React.Component < any, IMainPageState > {
 
     state: IMainPageState = initialState;
+    props: any;
 
     constructor(props: any){
       super(props);
+      this.props = props;
+      console.log(props);
       MeetingService.getMeetingList().then( list => {this.setState({meetingList: list});} );
     }
 
@@ -42,9 +45,9 @@ export class MainPage extends React.Component < any, IMainPageState > {
                  return <tr><td>{meeting.getId()}</td><td>{meeting.getTitle()}</td><td>{meeting.getDescription()}</td></tr>
                })}
             </table>
-              <button onClick={this.routeToCreateMeeting}>
+              <Link className={styles.button} to='/CreateMeeting'>
                 <span className={styles.label}>Neue Veranstaltung</span>
-              </button> 
+              </Link> 
             <a className={styles.button}>
               <span className={styles.label}>Bearbeiten</span>
             </a>
