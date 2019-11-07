@@ -5,6 +5,7 @@ import { IMainPageProps } from './IMainPageProps';
 import { Meeting } from '../../data/Meeting/Meeting';
 import { MeetingService } from '../../service/meeting-service';
 import { Link } from 'react-router-dom';
+import { DefaultButton } from 'office-ui-fabric-react';
 
 const initialState: IMainPageState = {
     meetingList: [new Meeting('3','Test','Test2')],
@@ -22,19 +23,19 @@ export class MainPage extends React.Component < any, IMainPageState > {
       MeetingService.getMeetingList().then( list => {this.setState({meetingList: list});} );
     }
 
-    protected routeToCreateMeeting():void {
-      this.props.history.push('/createMeeting');
+    public testButton():void {
+      console.log('Clicked Bearbeiten Button');
     }
 
     public render(): React.ReactElement<IMainPageProps> {
       MeetingService.getMeetingList().then( list => {this.state.meetingList = list;} );
         return(
         //<div className = { styles.createEvent } >
-        <div className={styles.mainPage}>
-        <div className={styles.container}>
-        <div className={styles.row}>
-          <div className={styles.column}>
-            <span className={styles.title}>Ihre Veranstaltungen!</span>
+        <div >
+        <div >
+        <div >
+          <div >
+            <span className={styles.title}>Ihre Veranstaltungen</span>
             <table>
               <tr>
                 <th>Id</th>
@@ -45,15 +46,11 @@ export class MainPage extends React.Component < any, IMainPageState > {
                  return <tr><td>{meeting.getId()}</td><td>{meeting.getTitle()}</td><td>{meeting.getDescription()}</td></tr>
                })}
             </table>
-              <Link className={styles.button} to='/CreateMeeting'>
-                <span className={styles.label}>Neue Veranstaltung</span>
-              </Link> 
-            <a className={styles.button}>
-              <span className={styles.label}>Bearbeiten</span>
-            </a>
-            <a className={styles.button}>
-              <span className={styles.label}>Status</span>
-            </a>
+              <Link to='/CreateMeeting'>
+                <DefaultButton text='Neue Veranstaltung' onClick={this.testButton} /> 
+              </Link>
+              <DefaultButton text='Bearbeiten' onClick={this.testButton} /> 
+              <DefaultButton text='Status' onClick={this.testButton} /> 
           </div>
         </div>
       </div>
