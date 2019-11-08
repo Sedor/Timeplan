@@ -9,7 +9,7 @@ import { DefaultButton } from 'office-ui-fabric-react';
 import { DetailsList, Selection, IColumn} from 'office-ui-fabric-react/lib/DetailsList';
 
 const initialState: IMainPageState = {
-    meetingList: [new Meeting('3','Test','Test2')],
+    meetingList: [new Meeting('3', 'Test', 'Test2')],
     columns: [],
     selectedMeeting: undefined,
 }

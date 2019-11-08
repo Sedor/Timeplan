@@ -1,7 +1,9 @@
-import { Appointment } from "../../data/Appointment/Appointment";
-import { User } from "../../data/User/User";
-import { Meeting } from "../../../../../lib/webparts/timeplan/data/Meeting/Meeting";
-import { IColumn } from "office-ui-fabric-react";
+import { Appointment } from '../../data/Appointment/Appointment';
+import { User } from '../../data/User/User';
+import { Meeting } from '../../data/Meeting/Meeting';
+import { DistributionNames } from '../../data/Distributions/DistributionNames';
+
+import { IColumn } from 'office-ui-fabric-react';
 
 export interface IMeetingState{
     userColumns:IColumn[],
@@ -10,7 +12,7 @@ export interface IMeetingState{
     meeting:Meeting,
     isUpdate: boolean,
     meetingName: string,
-    distributionMethod: string, // TODO Enum
+    distributionMethod: DistributionNames,
     appointmentList: Appointment[],
     invitedUserList: User[],
     activated: boolean,

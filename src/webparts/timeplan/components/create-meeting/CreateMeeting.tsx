@@ -20,7 +20,7 @@ const initialState: IMeetingState = {
     meeting: undefined,
     isUpdate: false,
     meetingName: "",
-    distributionMethod: "Blub",
+    distributionMethod: undefined,
     appointmentList: [new Appointment()],
     invitedUserList: [new User('1','Max','max@mail.de')],
     activated: false,
@@ -61,6 +61,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         console.log('state was set to:');
         console.log(this.state);
 
+        this._onDropdownChange = this._onDropdownChange.bind(this);
         this._onMeetingNameChange = this._onMeetingNameChange.bind(this);
         this._getSelectedAppointment = this._getSelectedAppointment.bind(this);
         this._onReleaseChange = this._onReleaseChange.bind(this);
@@ -112,10 +113,10 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     meeting:(this.props.location.state.selectedMeeting as Meeting),
                     isUpdate: true,
                     meetingName: (this.props.location.state.selectedMeeting as Meeting).title,
-                    distributionMethod: "Blub",
+                    distributionMethod: this.props.distributionMethod,
                     appointmentList: this.state.appointmentList,
                     invitedUserList: [new User('1','Max','max@mail.de')],
-                    activated: false,
+                    activated: false, //TOODO get the status for this
                 })
                 console.log('state was set to:');
                 console.log(this.state);
@@ -169,22 +170,36 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         console.log(this.state);
     }
 
-    private _onMeetingNameChange(test:any){
-        console.log('_onMeetingNameChange');
-        console.log(test);
+    private _onMeetingNameChange(meetingName:any){
         this.setState({
             userColumns: this.state.userColumns,
             appointmentColumns: this.state.appointmentColumns,                 
             selectedAppointment: this.state.selectedAppointment,   
             meeting: this.state.meeting,
             isUpdate: this.state.isUpdate,
-            meetingName: test,
+            meetingName: meetingName,
             distributionMethod: this.state.distributionMethod,
             appointmentList: this.state.appointmentList,
             invitedUserList: this.state.invitedUserList,
             activated: this.state.activated,});
     }
 
+    private _onDropdownChange(item: IDropdownOption): void {
+        console.log(`Selection change: ${item.text} ${item.selected ? 'selected' : 'unselected'}`);
+        console.log(item.key);
+        this.setState({
+            userColumns: this.state.userColumns,
+            appointmentColumns: this.state.appointmentColumns,                 
+            selectedAppointment: this.state.selectedAppointment,   
+            meeting: this.state.meeting,
+            isUpdate: this.state.isUpdate,
+            meetingName: this.state.meetingName,
+            distributionMethod: DistributionNames[item.key],
+            appointmentList: this.state.appointmentList,
+            invitedUserList: this.state.invitedUserList,
+            activated: this.state.activated,
+        });
+    };
 
     private _setAppointmentColumnNames():IColumn[] {
         let columns:IColumn[] = [{
@@ -246,12 +261,13 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 <div>
                     <div>
                         <p>{this.state.isUpdate ? this.state.meeting.title : 'Bitte Veranstaltungsname eintragen'}</p>
-                        <TextField label='Veranstaltungsnamee:' placeholder='Bitte Veranstaltungsname eintragen' value={this.state.meetingName} onChanged={this._onMeetingNameChange} required/>
+                        <TextField label='Veranstaltungsname:' placeholder='Bitte Veranstaltungsname eintragen' value={this.state.meetingName} onChanged={this._onMeetingNameChange} required/>
                     </div>
                     <div>
                         <Dropdown
                             label='Verteilalgorithmus:'
                             placeHolder="Verteilalgo auswaehlen"
+                            onChanged={this._onDropdownChange}
                             options={[
                                 { key: 'FIFO', text: 'First in First out' },
                                 { key: 'FAIRDISTRO', text: 'Fair Distribution' },
