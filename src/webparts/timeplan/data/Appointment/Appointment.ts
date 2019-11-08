@@ -1,26 +1,27 @@
 export class Appointment{
 
     public id: string;
-    public date: Date;
+    public date: string;
     public day: string;
     public appointmentStart: string;
     public appointmentEnd: string;
-    public personCount: number 
+    public personCount: string 
 
     constructor(){
         this.id = '1';
-        this.date = new Date();
-        this.day = 'Monday'
+        let date = new Date()
+        this.date = date.toLocaleTimeString('en-us', { day:'numeric', month: 'numeric', year: 'numeric'});
+        this.day = date.toLocaleTimeString('en-us', { weekday: 'long'})
         this.appointmentStart = '10:00';
         this.appointmentEnd = '12:00';
-        this.personCount = 12;
+        this.personCount = '12';
     }
 
     public getId():string {
         return this.id;
     }
 
-    public getDate():Date {
+    public getDate():string {
         return this.date;
     }
 
@@ -35,7 +36,7 @@ export class Appointment{
         return this.appointmentEnd;
     }
 
-    public getPersonCount():number {
+    public getPersonCount():string {
         return this.personCount;
     }
 

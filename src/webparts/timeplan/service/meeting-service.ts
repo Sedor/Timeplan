@@ -41,8 +41,8 @@ export class MeetingService {
           });
     }
 
-    public static deleteMeetingById(meeting:Meeting):void {
-        sp.web.lists.getByTitle(this.meetingListName).items.getItemByStringId(meeting.getId()).delete().then(_ => {
+    public static deleteMeetingById(meetingId:number):void {
+        sp.web.lists.getByTitle(this.meetingListName).items.getById(meetingId).delete().then(_ => {
             console.log('List Item Deleted')
         });    
     }
