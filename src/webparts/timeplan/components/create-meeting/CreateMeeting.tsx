@@ -4,33 +4,18 @@ import { ICreateMeetingProps } from './ICreateMeetingProps';
 import { IMeetingState } from './IMeetingState';
 import { Appointment } from '../../data/Appointment/Appointment';
 import { User } from '../../data/User/User';
-import { Meeting } from '../../../../../lib/webparts/timeplan/data/Meeting/Meeting';
+import { Meeting } from '../../data/Meeting/Meeting';
 import { DefaultButton } from 'office-ui-fabric-react';
 import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
 import { TextField} from 'office-ui-fabric-react/lib/TextField';
-import { DetailsList, Selection, IColumn} from 'office-ui-fabric-react/lib/DetailsList';
+import { DetailsList, Selection, IColumn, CheckboxVisibility} from 'office-ui-fabric-react/lib/DetailsList';
 import { Dropdown, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 import { DistributionNames } from '../../data/Distributions/DistributionNames';
 import { Link } from 'react-router-dom';
 import { AppointmentService } from '../../service/Appointment-Service';
 
-
-const initialState: IMeetingState = {
-    userColumns: [],
-    appointmentColumns: [],
-    selectedAppointment: undefined,
-    meeting: undefined,
-    isUpdate: false,
-    meetingName: "",
-    distributionMethod: undefined,
-    appointmentList: undefined,
-    invitedUserList: [new User('1','Max','max@mail.de')],
-    activated: false,
-}
-
 export class CreateMeeting extends React.Component < any, IMeetingState > {
 
-    state: IMeetingState = initialState;
     private selection: Selection;
 
     constructor(props: any){
@@ -39,56 +24,47 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         console.log('in Constructor');
         console.log('state is:');
         console.log(this.state);
-        this.state ={
+        this.state = {
             userColumns: this._setUserColumnNames(),
             appointmentColumns: this._setAppointmentColumnNames(),
-            selectedAppointment: this._getSelectedAppointment(),
-            meeting: this.state.meeting,
-            isUpdate: this.state.isUpdate,
-            meetingName: this.state.meetingName,
-            distributionMethod: this.state.distributionMethod,
-            appointmentList: undefined,
-            invitedUserList: this.state.invitedUserList,
-            activated: this.state.activated
-        }
-        console.log('state was set to:');
-        console.log(this.state);
+            isUpdate: false,
+            meeting: new Meeting('100','',''),  // TODO remove
+            appointmentList: [],
+            invitedUserList: [],
+            activated: false,
+        };
+
+        this.initializeSelection();
+        
 
         this._onDropdownChange = this._onDropdownChange.bind(this);
         this._onMeetingNameChange = this._onMeetingNameChange.bind(this);
         this._getSelectedAppointment = this._getSelectedAppointment.bind(this);
         this._onReleaseChange = this._onReleaseChange.bind(this);
-        this.initializeSelectionCallback = this.initializeSelectionCallback.bind(this);
+        this.initializeSelection = this.initializeSelection.bind(this);
         this.createNewAppointment = this.createNewAppointment.bind(this);
     }
 
-    private initializeSelectionCallback():void {
+    private initializeSelection():void {
         this.selection = new Selection({
           onSelectionChanged: () => {
             console.log('onSelectionChanged:');
-            console.log('state is:');
-            console.log(this.state);
             this.setState({
-                userColumns: this.state.userColumns,
-                appointmentColumns: this.state.appointmentColumns,
                 selectedAppointment: this._getSelectedAppointment(),
-                meeting: this.state.meeting,
                 isUpdate: this.state.isUpdate,
-                meetingName: this.state.meetingName,
-                distributionMethod: this.state.distributionMethod,
-                appointmentList: this.state.appointmentList,
-                invitedUserList: this.state.invitedUserList,
                 activated: this.state.activated
             })
-            console.log('state was set to:');
-            console.log(this.state);
           }
         });
     }
 
     private _getSelectedAppointment():Appointment {
         console.log(this.selection);
-        return undefined;
+        if((this.selection.getSelection()[0] as Appointment) === undefined){
+            return this.state.selectedAppointment;
+        }else{
+            return (this.selection.getSelection()[0] as Appointment);
+        }
     }
 
     componentDidMount(){
@@ -99,22 +75,19 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 console.log('this.prop.location.state.selectedMeeting is defined');
                 console.log('state is:');
                 console.log(this.state);
-                
-
-                this.setState({
-                    userColumns: this.state.userColumns,
-                    appointmentColumns: this.state.appointmentColumns,
-                    selectedAppointment: undefined,
-                    meeting:(this.props.location.state.selectedMeeting as Meeting),
-                    isUpdate: true,
-                    meetingName: (this.props.location.state.selectedMeeting as Meeting).title,
-                    distributionMethod: this.props.distributionMethod,
-                    appointmentList: this.state.appointmentList,
-                    invitedUserList: [new User('1','Max','max@mail.de')],
-                    activated: false, //TOODO get the status for this
-                })
-                console.log('state was set to:');
-                console.log(this.state);
+                let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
+                AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.id).then(appointmentList =>{
+                    this.setState({
+                        meeting: this.state.meeting,
+                        isUpdate: true,
+                        appointmentList: appointmentList,
+                        invitedUserList: [new User('1','Max','max@mail.de')],
+                        activated: false, //TOODO get the status for this
+                    })
+                    console.log('state was set to:');
+                    console.log(this.state);
+                });
+                console.log('ended ComponentDidMount');
             }
         }
     }
@@ -151,31 +124,17 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         console.log('state is:');
         console.log(this.state);
         this.setState({
-            userColumns: this.state.userColumns,
-            appointmentColumns: this.state.appointmentColumns,                 
-            selectedAppointment: this.state.selectedAppointment,   
-            meeting: this.state.meeting,
             isUpdate: this.state.isUpdate,
-            meetingName: this.state.meetingName,
-            distributionMethod: this.state.distributionMethod,
-            appointmentList: this.state.appointmentList,
-            invitedUserList: this.state.invitedUserList,
             activated: checked,});
         console.log('state was set to:');
         console.log(this.state);
     }
 
-    private _onMeetingNameChange(meetingName:any){
-        this.setState({
-            userColumns: this.state.userColumns,
-            appointmentColumns: this.state.appointmentColumns,                 
-            selectedAppointment: this.state.selectedAppointment,   
+    private _onMeetingNameChange(meetingName:string){
+        this.state.meeting.setTitle(meetingName);
+        this.setState({  
             meeting: this.state.meeting,
             isUpdate: this.state.isUpdate,
-            meetingName: meetingName,
-            distributionMethod: this.state.distributionMethod,
-            appointmentList: this.state.appointmentList,
-            invitedUserList: this.state.invitedUserList,
             activated: this.state.activated,});
     }
 
@@ -183,15 +142,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         console.log(`Selection change: ${item.text} ${item.selected ? 'selected' : 'unselected'}`);
         console.log(item.key);
         this.setState({
-            userColumns: this.state.userColumns,
-            appointmentColumns: this.state.appointmentColumns,                 
-            selectedAppointment: this.state.selectedAppointment,   
-            meeting: this.state.meeting,
             isUpdate: this.state.isUpdate,
-            meetingName: this.state.meetingName,
             distributionMethod: DistributionNames[item.key],
-            appointmentList: this.state.appointmentList,
-            invitedUserList: this.state.invitedUserList,
             activated: this.state.activated,
         });
     };
@@ -200,15 +152,15 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         let columns:IColumn[] = [{
           key: 'column1',
           name: 'Datum',
-          fieldName: 'date',
+          fieldName: 'appointmentDate',
           minWidth: 50,
           maxWidth: 100,
         } as IColumn,{
           key: 'column2',
           name: 'Tag',
           fieldName: 'day',
-          minWidth: 100,
-          maxWidth: 350,
+          minWidth: 50,
+          maxWidth: 100,
         } as IColumn,{
           key: 'column3',
           name: 'Von',
@@ -255,8 +207,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 <h1> Veranstaltung {this.state.isUpdate ? 'bearbeiten' : 'erstellen'} </h1>
                 <div>
                     <div>
-                        <p>{this.state.isUpdate ? this.state.meeting.title : 'Bitte Veranstaltungsname eintragen'}</p>
-                        <TextField label='Veranstaltungsname:' placeholder='Bitte Veranstaltungsname eintragen' value={this.state.meetingName} onChanged={this._onMeetingNameChange} required/>
+                        <TextField label='Veranstaltungsname:' placeholder='Bitte Veranstaltungsname eintragen' value={this.state.meeting.title} onChanged={this._onMeetingNameChange} required/>
                     </div>
                     <div>
                         <Dropdown
@@ -276,6 +227,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     columns={this.state.appointmentColumns}
                     selectionPreservedOnEmptyClick={true}
                     selection={this.selection}
+                    checkboxVisibility={CheckboxVisibility.hidden}
                     />
                 </div>
                 <div>
@@ -288,7 +240,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     items={this.state.invitedUserList}
                     columns={this.state.userColumns}
                     selectionPreservedOnEmptyClick={true}
-                    selection={this.selection}
+                    // selection={this.selection}
+                    checkboxVisibility={CheckboxVisibility.hidden}
                     />
                 </div> 
                 <div>

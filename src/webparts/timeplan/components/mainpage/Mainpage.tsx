@@ -79,11 +79,6 @@ export class MainPage extends React.Component < any, IMainPageState > {
       console.log(this.state);
     }
 
-    private _onItemInvoked(item: any): void {
-      console.log(item);
-      alert(`Item invoked: ${item}`);
-    }
-
     public render(): React.ReactElement<IMainPageProps> {
       MeetingService.getMeetingList().then( list => {this.state.meetingList = list;} );
       return(
@@ -95,7 +90,6 @@ export class MainPage extends React.Component < any, IMainPageState > {
                 items={this.state.meetingList}
                 columns={this.state.columns}
                 selectionPreservedOnEmptyClick={true}
-                onItemInvoked={this._onItemInvoked}
                 selection={this.selection}
                 checkboxVisibility={CheckboxVisibility.hidden}
               />

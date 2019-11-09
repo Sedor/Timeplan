@@ -17,6 +17,10 @@ export class Meeting{
         this.distribution = distribution;
     }
 
+    public setTitle(title:string){
+        this.title = title;
+    }
+
     public getId():string {
         return this.id;
     }
@@ -28,4 +32,6 @@ export class Meeting{
     public getDescription():string {
         return this.description;
     }
+
+
 }
