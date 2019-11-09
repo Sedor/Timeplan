@@ -6,10 +6,10 @@ import { Meeting } from '../../data/Meeting/Meeting';
 import { MeetingService } from '../../service/meeting-service';
 import { Link } from 'react-router-dom';
 import { DefaultButton } from 'office-ui-fabric-react';
-import { DetailsList, Selection, IColumn} from 'office-ui-fabric-react/lib/DetailsList';
+import { DetailsList, Selection, IColumn, SelectionMode, CheckboxVisibility} from 'office-ui-fabric-react/lib/DetailsList';
 
 const initialState: IMainPageState = {
-    meetingList: [new Meeting('3', 'Test', 'Test2')],
+    meetingList: [],
     columns: [],
     selectedMeeting: undefined,
 }
@@ -97,6 +97,7 @@ export class MainPage extends React.Component < any, IMainPageState > {
                 selectionPreservedOnEmptyClick={true}
                 onItemInvoked={this._onItemInvoked}
                 selection={this.selection}
+                checkboxVisibility={CheckboxVisibility.hidden}
               />
               <Link to='/CreateMeeting'>
                 <DefaultButton text='Neue Veranstaltung' onClick={this.testButton} /> 

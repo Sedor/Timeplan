@@ -6,14 +6,15 @@ import { DistributionNames } from '../../data/Distributions/DistributionNames';
 import { IColumn } from 'office-ui-fabric-react';
 
 export interface IMeetingState{
-    userColumns:IColumn[],
-    appointmentColumns:IColumn[],
-    selectedAppointment:Appointment,
-    meeting:Meeting,
     isUpdate: boolean,
-    meetingName: string,
-    distributionMethod: DistributionNames,
-    appointmentList: Appointment[],
-    invitedUserList: User[],
     activated: boolean,
+
+    userColumns?:IColumn[],
+    appointmentColumns?:IColumn[],
+    selectedAppointment?:Appointment,
+    meeting?:Meeting,
+    distributionMethod?: DistributionNames,
+    appointmentList?: Appointment[],
+    invitedUserList?: User[],
+    
 }

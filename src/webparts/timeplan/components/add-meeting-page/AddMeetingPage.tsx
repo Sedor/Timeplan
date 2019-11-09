@@ -4,6 +4,9 @@ import { IAddMeetingPageProps } from './IAddMeetingPageProps';
 import { IAddMeetingPageState } from './IAddMeetingPageState';
 import { MeetingService } from '../../service/meeting-service';
 import { Meeting } from '../../data/Meeting/Meeting';
+import { Appointment } from '../../data/Appointment/Appointment';
+import { AppointmentService } from '../../service/Appointment-Service';
+
 
 const initialState: IAddMeetingPageState = {
     event: {
@@ -65,6 +68,29 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
         MeetingService.deleteMeetingById(4);
     }
 
+    public getListOfAppointmentsByMeeting() {
+        console.log('getListOfAppointmentsByMeeting');
+        // let appointmentlist: Appointment[];
+        AppointmentService.getAppointmentListForMeetingId('1')
+        .then(list => {
+            console.log('Got AppointmentList');
+            console.log(list);
+        });
+    }
+
+    public addAppointmentToFirstMeeting() {
+        console.log('addAppointmentToFirstMeeting');
+        let appointment = new Appointment({
+            foreignMeetingId: '1',
+            appointmentDate: new Date().toDateString(),
+            appointmentStart: '12:00',
+            appointmentEnd: '15:00',
+            personCount: '2',
+        });
+        AppointmentService.addAppointment(appointment).then(result => {console.log('addded appointment')})
+    }
+
+
     public render(): React.ReactElement<IAddMeetingPageProps> {
         return(
         <div>  
@@ -83,6 +109,12 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
             </div>
             <div>
                 <button onClick={this.deleteMeetingWithID4}>Delete Meeting ID 4</button>
+            </div>
+            <div>
+                <button onClick={this.getListOfAppointmentsByMeeting}>Get AppointmentList for Meeting ID 1</button>
+            </div>
+            <div>
+                <button onClick={this.addAppointmentToFirstMeeting}>Add Appointment to Meeting ID 1</button>
             </div>
         </div >
         );

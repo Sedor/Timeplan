@@ -12,16 +12,18 @@ import { DetailsList, Selection, IColumn} from 'office-ui-fabric-react/lib/Detai
 import { Dropdown, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 import { DistributionNames } from '../../data/Distributions/DistributionNames';
 import { Link } from 'react-router-dom';
+import { AppointmentService } from '../../service/Appointment-Service';
+
 
 const initialState: IMeetingState = {
     userColumns: [],
     appointmentColumns: [],
-    selectedAppointment: new Appointment(),
+    selectedAppointment: undefined,
     meeting: undefined,
     isUpdate: false,
     meetingName: "",
     distributionMethod: undefined,
-    appointmentList: [new Appointment()],
+    appointmentList: undefined,
     invitedUserList: [new User('1','Max','max@mail.de')],
     activated: false,
 }
@@ -33,16 +35,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     constructor(props: any){
         super(props);
-
-        // TODO get appointment List
-        // vor now Mock appointments
-        let list:Appointment[] = [
-            new Appointment(),
-            new Appointment(),
-            new Appointment(),
-            new Appointment(),
-            new Appointment(),
-        ];
+       
         console.log('in Constructor');
         console.log('state is:');
         console.log(this.state);
@@ -54,7 +47,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             isUpdate: this.state.isUpdate,
             meetingName: this.state.meetingName,
             distributionMethod: this.state.distributionMethod,
-            appointmentList: list,
+            appointmentList: undefined,
             invitedUserList: this.state.invitedUserList,
             activated: this.state.activated
         }
@@ -95,21 +88,23 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     private _getSelectedAppointment():Appointment {
         console.log(this.selection);
-        return new Appointment();
+        return undefined;
     }
 
     componentDidMount(){
         console.log('in ComponentDidMount');
         if(this.props.location.state !== undefined){
-            console.log('this.prop.location.state is not undefined');
+            console.log('this.prop.location.state is defined');
             if(this.props.location.state.selectedMeeting !== undefined){
-                console.log('this.prop.location.state.selectedMeeting is not undefined');
+                console.log('this.prop.location.state.selectedMeeting is defined');
                 console.log('state is:');
                 console.log(this.state);
+                
+
                 this.setState({
                     userColumns: this.state.userColumns,
                     appointmentColumns: this.state.appointmentColumns,
-                    selectedAppointment: new Appointment(),
+                    selectedAppointment: undefined,
                     meeting:(this.props.location.state.selectedMeeting as Meeting),
                     isUpdate: true,
                     meetingName: (this.props.location.state.selectedMeeting as Meeting).title,

@@ -1,43 +1,74 @@
-export class Appointment{
+export interface IAppointment{    
+    foreignMeetingId: string,
+    appointmentDate: string,
+    appointmentStart: string,
+    appointmentEnd: string,
+    personCount: string,
+    sharepointPrimaryId?: string,
+}
 
-    public id: string;
-    public date: string;
-    public day: string;
-    public appointmentStart: string;
-    public appointmentEnd: string;
-    public personCount: string 
+export class Appointment {
 
-    constructor(){
-        this.id = '1';
-        let date = new Date()
-        this.date = date.toLocaleTimeString('en-us', { day:'numeric', month: 'numeric', year: 'numeric'});
-        this.day = date.toLocaleTimeString('en-us', { weekday: 'long'})
-        this.appointmentStart = '10:00';
-        this.appointmentEnd = '12:00';
-        this.personCount = '12';
+    foreignMeetingId: string;
+    appointmentDate: string;
+    appointmentStart: string;
+    appointmentEnd: string;
+    personCount: string;
+    sharepointPrimaryId?: string;
+
+    constructor(obj: IAppointment ) {
+        for (let key in obj) {
+            this[key] = obj[key];
+        }
     }
 
-    public getId():string {
-        return this.id;
-    }
+    // public get sharepointPrimaryId():string {
+    //     return this.sharepointPrimaryId;
+    // }
 
-    public getDate():string {
-        return this.date;
-    }
+    // public get appointmentDate():string {
+    //     return this.appointmentDate;
+    // }
 
-    public getDay():string {
-        return this.day;
-    }
-    public getAppointmentStart():string {
-        return this.appointmentStart;
-    }
+    // public get appointmentDay():string {
+    //     return this.appointmentDay;
+    // }
 
-    public getAppointmentEnd():string {
-        return this.appointmentEnd;
-    }
+    // public get appointmentStart():string {
+    //     return this.appointmentStart;
+    // }
 
-    public getPersonCount():string {
-        return this.personCount;
-    }
+    // public get appointmentEnd():string {
+    //     return this.appointmentEnd;
+    // }
+
+    // public get personCount():string {
+    //     return this.personCount;
+    // }
+
+    // public set sharepointPrimaryId(sharepointPrimaryId:string) {
+    //     this.sharepointPrimaryId = sharepointPrimaryId;
+    // }
+
+    // public set appointmentDate(appointmentDate:string) {
+    //     this.appointmentDate = appointmentDate;
+    // }
+
+    // public set appointmentDay(appointmentDay:string) {
+    //     this.appointmentDay = appointmentDay;
+    // }
+
+    // public set appointmentStart(appointmentStart:string) {
+    //     this.appointmentStart = appointmentStart;
+    // }
+
+    // public set appointmentEnd(appointmentEnd:string) {
+    //     this.appointmentEnd = appointmentEnd;
+    // }
+
+    // public set personCount(personCount:string) {
+    //     this.personCount = personCount;
+    // }
+
 
 }

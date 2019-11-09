@@ -3,7 +3,7 @@ import { Meeting } from '../data/Meeting/Meeting'
 
 export class MeetingService {
 
-    static readonly meetingListName:string = 'Event_List';
+    static readonly meetingListName:string = 'MeetingList';
 
     public static async getMeetingList():Promise<Meeting[]> { //DONE
         return await sp.web.lists.getByTitle(this.meetingListName).items.get().then((itemsArray: any[]) => {
