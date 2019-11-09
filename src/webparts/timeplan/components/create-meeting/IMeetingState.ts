@@ -9,6 +9,7 @@ export interface IMeetingState{
     isUpdate: boolean,
     activated: boolean,
 
+    showModal?:boolean,
     userColumns?:IColumn[],
     appointmentColumns?:IColumn[],
     selectedAppointment?:Appointment,

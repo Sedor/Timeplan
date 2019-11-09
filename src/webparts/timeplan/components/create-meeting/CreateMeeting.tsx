@@ -13,6 +13,8 @@ import { Dropdown, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 import { DistributionNames } from '../../data/Distributions/DistributionNames';
 import { Link } from 'react-router-dom';
 import { AppointmentService } from '../../service/Appointment-Service';
+import { Modal } from 'office-ui-fabric-react/lib/Modal';
+import { CreateAppointment } from '../create-appointment/CreateAppointment';
 
 export class CreateMeeting extends React.Component < any, IMeetingState > {
 
@@ -32,6 +34,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             appointmentList: [],
             invitedUserList: [],
             activated: false,
+            showModal: false,
         };
 
         this.initializeSelection();
@@ -94,11 +97,16 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     public createNewAppointment():void {
         console.log('clicked CreateNewAppointment');
-        console.log(this.state);
+        this.setState({
+            isUpdate: this.state.isUpdate,
+            activated: this.state.activated,
+            showModal: true,
+        })
     }
 
     public modifyAppointment():void {
         console.log('clicked modifyAppointment');
+        console.log(this.state);
     }
 
     public deleteAppointment():void {
@@ -257,7 +265,17 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                         <DefaultButton text='Abbrechen' /> 
                     </Link>
                 </div>
-            </div >
+            </div>
+            <Modal
+                titleAriaId={'Test_Title'}
+                subtitleAriaId={'Test_Subtitle'}
+                isOpen={this.state.showModal}
+                // onDismiss={this._closeModal}
+                isBlocking={false}
+                >
+                <CreateAppointment />
+            
+            </Modal>
         </div>
         );
     }
