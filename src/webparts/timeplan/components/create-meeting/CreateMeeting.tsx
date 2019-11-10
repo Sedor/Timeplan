@@ -39,8 +39,9 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
         this.initializeSelection();
         
-
+        this.modifyAppointment = this.modifyAppointment.bind(this); // TODO remove
         this._onDropdownChange = this._onDropdownChange.bind(this);
+        this._addAppointment = this._addAppointment.bind(this);
         this._onMeetingNameChange = this._onMeetingNameChange.bind(this);
         this._getSelectedAppointment = this._getSelectedAppointment.bind(this);
         this._onReleaseChange = this._onReleaseChange.bind(this);
@@ -156,6 +157,19 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         });
     };
 
+    private _closeModal = (): void => {
+        this.setState({ showModal: false });
+      };
+
+    private _addAppointment(appointment:Appointment): void{
+        console.log('_addAppointment');
+        console.log(appointment);
+        let newAppointmentList = this.state.appointmentList.concat([appointment]);
+        this.setState({
+            appointmentList: newAppointmentList,
+        });
+    }
+
     private _setAppointmentColumnNames():IColumn[] {
         let columns:IColumn[] = [{
           key: 'column1',
@@ -169,6 +183,9 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
           fieldName: 'day',
           minWidth: 50,
           maxWidth: 100,
+          onRender: (item: Appointment) => {
+            return <span>Dienstag</span>;
+          }
         } as IColumn,{
           key: 'column3',
           name: 'Von',
@@ -249,6 +266,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     columns={this.state.userColumns}
                     selectionPreservedOnEmptyClick={true}
                     // selection={this.selection}
+
                     checkboxVisibility={CheckboxVisibility.hidden}
                     />
                 </div> 
@@ -270,11 +288,13 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 titleAriaId={'Test_Title'}
                 subtitleAriaId={'Test_Subtitle'}
                 isOpen={this.state.showModal}
-                // onDismiss={this._closeModal}
+                onDismiss={this._closeModal}
                 isBlocking={false}
                 >
-                <CreateAppointment />
-            
+                <CreateAppointment 
+                    closeCreateAppointmentModal={this._closeModal} 
+                    addAppointmentToList={this._addAppointment}
+                />
             </Modal>
         </div>
         );

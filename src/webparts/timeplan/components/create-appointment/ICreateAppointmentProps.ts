@@ -1,3 +1,8 @@
+import { Appointment } from '../../data/Appointment/Appointment';
+
 export interface ICreateAppointmentProps{
-    test: string
+    appointmentToEdit: Appointment;
+    foreignMeetingId: string;
+    closeCreateAppointmentModal: () => void;
+    addAppointmentToList: (appointment:Appointment) => void;
 }

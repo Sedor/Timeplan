@@ -6,8 +6,8 @@ import { DistributionNames } from '../../data/Distributions/DistributionNames';
 import { IColumn } from 'office-ui-fabric-react';
 
 export interface IMeetingState{
-    isUpdate: boolean,
-    activated: boolean,
+    isUpdate?: boolean,
+    activated?: boolean,
 
     showModal?:boolean,
     userColumns?:IColumn[],
