@@ -39,6 +39,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
         this.initializeSelection();
         
+        this.componentDidMount = this.componentDidMount.bind(this);
+        this.deleteAppointment = this.deleteAppointment.bind(this); // TODO maybe also delete this
         this.modifyAppointment = this.modifyAppointment.bind(this); // TODO remove
         this._onDropdownChange = this._onDropdownChange.bind(this);
         this._addAppointment = this._addAppointment.bind(this);
@@ -72,6 +74,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     componentDidMount(){
+        window.addEventListener("beforeunload", this._handleWindowBeforeUnload);
         console.log('in ComponentDidMount');
         if(this.props.location.state !== undefined){
             console.log('this.prop.location.state is defined');
@@ -82,7 +85,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
                 AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.id).then(appointmentList =>{
                     this.setState({
-                        meeting: this.state.meeting,
+                        meeting: meetingToUpgrade,
                         isUpdate: true,
                         appointmentList: appointmentList,
                         invitedUserList: [new User('1','Max','max@mail.de')],
@@ -96,22 +99,40 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         }
     }
 
+    componentWillUnmount() {
+        console.log('componentWillUnmount');
+        window.removeEventListener("beforeunload", this._handleWindowBeforeUnload);
+    }
+
+    private _handleWindowBeforeUnload(ev: BeforeUnloadEvent):void{
+        console.log('_handleWindowBeforeUnload');
+        ev.returnValue = 'Aenderungen sind noch nicht gespeichert. Wirklich die Seite verlassen?';
+    }
+
     public createNewAppointment():void {
         console.log('clicked CreateNewAppointment');
         this.setState({
-            isUpdate: this.state.isUpdate,
-            activated: this.state.activated,
             showModal: true,
         })
     }
 
     public modifyAppointment():void {
         console.log('clicked modifyAppointment');
-        console.log(this.state);
+        if(this.state.selectedAppointment === undefined || this.state.selectedAppointment === null){
+            alert('Selected Appointment is undefined or null');
+            console.log(this.state.selectedAppointment);
+        }else {
+            console.log(this.state.selectedAppointment);
+        }
+        this.setState({
+            showModal: true,
+        })
+        
     }
 
     public deleteAppointment():void {
         console.log('clicked deleteAppointment');
+        console.log(this.state);
     }
 
     public inviteUser():void {
@@ -163,6 +184,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     private _addAppointment(appointment:Appointment): void{
         console.log('_addAppointment');
+        appointment.foreignMeetingId = this.state.meeting.id;
         console.log(appointment);
         let newAppointmentList = this.state.appointmentList.concat([appointment]);
         this.setState({
@@ -250,7 +272,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     <DetailsList
                     items={this.state.appointmentList}
                     columns={this.state.appointmentColumns}
-                    selectionPreservedOnEmptyClick={true}
+                    // selectionPreservedOnEmptyClick={true}
                     selection={this.selection}
                     checkboxVisibility={CheckboxVisibility.hidden}
                     />
@@ -264,7 +286,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     <DetailsList
                     items={this.state.invitedUserList}
                     columns={this.state.userColumns}
-                    selectionPreservedOnEmptyClick={true}
+                    // selectionPreservedOnEmptyClick={true}
                     // selection={this.selection}
 
                     checkboxVisibility={CheckboxVisibility.hidden}
@@ -294,6 +316,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 <CreateAppointment 
                     closeCreateAppointmentModal={this._closeModal} 
                     addAppointmentToList={this._addAppointment}
+                    appointmentToEdit = {this.state.selectedAppointment}
                 />
             </Modal>
         </div>

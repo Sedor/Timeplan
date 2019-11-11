@@ -5,5 +5,5 @@ export interface ICreateAppointmentState{
     until?: string,
     persons?: string,
     firstDayOfWeek?: DayOfWeek,
-    value?: Date | null;
+    meetingDate?: Date | null;
 }

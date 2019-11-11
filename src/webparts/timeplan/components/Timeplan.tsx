@@ -17,9 +17,9 @@ export default class Timeplan extends React.Component < ITimeplanProps, {} > {
       <HashRouter>
         <div>
         <Switch>
-            <Route path='/addMeeting' component={AddMeetingPage} />
-            <Route path='/createMeeting' component={CreateMeeting} />
-            <Route path='/createAppointment' component={CreateAppointment} />
+            <Route path='/addMeeting' component={AddMeetingPage} exact />
+            <Route path='/createMeeting' component={CreateMeeting} exact />
+            <Route path='/createAppointment' component={CreateAppointment} exact />
             <Route path='/' component={MainPage} exact />
             <Route render={() => <h1>Page Not found</h1> } />
           </Switch>
