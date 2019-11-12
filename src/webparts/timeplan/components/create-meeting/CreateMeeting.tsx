@@ -3,7 +3,7 @@ import styles from './CreateMeeting.module.scss';
 import { ICreateMeetingProps } from './ICreateMeetingProps';
 import { IMeetingState } from './IMeetingState';
 import { Appointment } from '../../data/Appointment/Appointment';
-import { User } from '../../data/User/User';
+import { User,IUser } from '../../data/User/User';
 import { Meeting } from '../../data/Meeting/Meeting';
 import { DefaultButton } from 'office-ui-fabric-react';
 import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
@@ -14,7 +14,7 @@ import { DistributionNames } from '../../data/Distributions/DistributionNames';
 import { Link } from 'react-router-dom';
 import { AppointmentService } from '../../service/Appointment-Service';
 import { Modal } from 'office-ui-fabric-react/lib/Modal';
-import { CreateAppointment } from '../create-appointment/CreateAppointment';
+import { CreateAppointment } from './create-appointment/CreateAppointment';
 
 export class CreateMeeting extends React.Component < any, IMeetingState > {
 
@@ -30,7 +30,9 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             userColumns: this._setUserColumnNames(),
             appointmentColumns: this._setAppointmentColumnNames(),
             isUpdate: false,
-            meeting: new Meeting('100','',''),  // TODO remove
+            meeting: new Meeting({
+                title: 'test'
+            }),  // TODO remove
             appointmentList: [],
             invitedUserList: [],
             activated: false,
@@ -88,7 +90,10 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                         meeting: meetingToUpgrade,
                         isUpdate: true,
                         appointmentList: appointmentList,
-                        invitedUserList: [new User('1','Max','max@mail.de')],
+                        invitedUserList: [new User({
+                            name: 'Max',
+                            eMail: 'email@mail.de'
+                        })],
                         activated: false, //TOODO get the status for this
                     })
                     console.log('state was set to:');
@@ -119,14 +124,15 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     public modifyAppointment():void {
         console.log('clicked modifyAppointment');
         if(this.state.selectedAppointment === undefined || this.state.selectedAppointment === null){
-            alert('Selected Appointment is undefined or null');
+            alert('You didnt select an Appointment');
             console.log(this.state.selectedAppointment);
         }else {
             console.log(this.state.selectedAppointment);
+            this.setState({
+                showModal: true,
+            })
         }
-        this.setState({
-            showModal: true,
-        })
+        
         
     }
 
@@ -190,6 +196,26 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         this.setState({
             appointmentList: newAppointmentList,
         });
+    }
+
+    // options={[
+    //     { key: 'FIFO', text: 'First in First out' },
+    //     { key: 'FAIRDISTRO', text: 'Fair Distribution' },
+    //   ]}
+
+
+    private _generateDistributionDropdownOptions():IDropdownOption[] {
+        let dropdownOptions:IDropdownOption[];
+        dropdownOptions = [];
+        for (let item in DistributionNames){
+            console.log(item);
+            console.log(DistributionNames[item]);
+            dropdownOptions.push({
+                key: item,
+                text: DistributionNames[item],
+            });
+        }
+        return dropdownOptions;
     }
 
     private _setAppointmentColumnNames():IColumn[] {
@@ -258,13 +284,11 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     </div>
                     <div>
                         <Dropdown
+                            required
                             label='Verteilalgorithmus:'
                             placeHolder="Verteilalgo auswaehlen"
                             onChanged={this._onDropdownChange}
-                            options={[
-                                { key: 'FIFO', text: 'First in First out' },
-                                { key: 'FAIRDISTRO', text: 'Fair Distribution' },
-                              ]}
+                            options={this._generateDistributionDropdownOptions()}
                         />
                     </div>
                 </div>

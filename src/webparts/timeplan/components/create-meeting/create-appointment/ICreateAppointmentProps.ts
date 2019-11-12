@@ -1,4 +1,4 @@
-import { Appointment } from '../../data/Appointment/Appointment';
+import { Appointment } from '../../../data/Appointment/Appointment';
 
 export interface ICreateAppointmentProps{
     appointmentToEdit: Appointment;

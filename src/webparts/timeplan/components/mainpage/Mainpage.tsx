@@ -3,7 +3,7 @@ import styles from './Mainpage.module.scss';
 import { IMainPageState } from './IMainPageState';
 import { IMainPageProps } from './IMainPageProps';
 import { Meeting } from '../../data/Meeting/Meeting';
-import { MeetingService } from '../../service/meeting-service';
+import { MeetingService } from '../../service/Meeting-Service';
 import { Link } from 'react-router-dom';
 import { DefaultButton } from 'office-ui-fabric-react';
 import { DetailsList, Selection, IColumn, SelectionMode, CheckboxVisibility} from 'office-ui-fabric-react/lib/DetailsList';
@@ -70,6 +70,12 @@ export class MainPage extends React.Component < any, IMainPageState > {
         fieldName: 'description',
         minWidth: 210,
         maxWidth: 350,
+      },{
+        key: 'column3',
+        name: 'Status',
+        fieldName: 'status',
+        minWidth: 210,
+        maxWidth: 350,
       },]
       return columns;
     }
@@ -94,7 +100,7 @@ export class MainPage extends React.Component < any, IMainPageState > {
                 checkboxVisibility={CheckboxVisibility.hidden}
               />
               <Link to='/CreateMeeting'>
-                <DefaultButton text='Neue Veranstaltung' onClick={this.testButton} /> 
+                <DefaultButton text='Neue Veranstaltung' /> 
               </Link>
               <Link to={{
                 pathname: '/CreateMeeting',
@@ -102,9 +108,16 @@ export class MainPage extends React.Component < any, IMainPageState > {
                   selectedMeeting: this.state.selectedMeeting
                   }
                 }}>
-                <DefaultButton text='Bearbeiten' onClick={this.testButton} />
+                <DefaultButton text='Bearbeiten' />
               </Link> 
-              <DefaultButton text='Status' onClick={this.testButton} /> 
+              <Link to={{
+                pathname: '/MeetingStatus',
+                state: {
+                  selectedMeeting: this.state.selectedMeeting
+                  }
+                }}>
+                <DefaultButton text='Status' />
+              </Link> 
           </div>
         </div>
       </div>

@@ -2,7 +2,8 @@ import * as React from 'react';
 import styles from './AddMeetingPage.module.scss';
 import { IAddMeetingPageProps } from './IAddMeetingPageProps';
 import { IAddMeetingPageState } from './IAddMeetingPageState';
-import { MeetingService } from '../../service/meeting-service';
+import { MeetingService } from '../../service/Meeting-Service';
+import { UserService } from '../../service/User-Service';
 import { Meeting } from '../../data/Meeting/Meeting';
 import { Appointment } from '../../data/Appointment/Appointment';
 import { AppointmentService } from '../../service/Appointment-Service';
@@ -56,11 +57,11 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
     }
 
     public addNewMeeting():void {
-        let newMeeting = new Meeting('8','NewMeeting','A new Meeting that got saved');
-        console.log('Adding a new Meeting');
-        console.log(newMeeting);
-        MeetingService.addMeeting(newMeeting);
-        console.log('New Meeting got added');
+        // let newMeeting = new Meeting('8','NewMeeting','A new Meeting that got saved');
+        // console.log('Adding a new Meeting');
+        // console.log(newMeeting);
+        // MeetingService.addMeeting(newMeeting);
+        // console.log('New Meeting got added');
     }
 
     public deleteMeetingWithID4():void {
@@ -91,6 +92,10 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
     }
 
 
+    public testAssignedRoleOfCurrentUser() {
+            UserService.createParticipantsList(null);
+    }
+
     public render(): React.ReactElement<IAddMeetingPageProps> {
         return(
         <div>  
@@ -115,6 +120,9 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
             </div>
             <div>
                 <button onClick={this.addAppointmentToFirstMeeting}>Add Appointment to Meeting ID 1</button>
+            </div>
+            <div>
+                <button onClick={this.testAssignedRoleOfCurrentUser}>Check Permission</button>
             </div>
         </div >
         );

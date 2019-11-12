@@ -1,24 +1,31 @@
+export interface IUser{    
+    id?: string;
+    name: string;
+    eMail: string;
+}
+
+
 export class User{
 
     public id: string;
     public name: string;
     public eMail: string;
 
-    constructor(id:string, name:string, eMail:string){
-        this.id = id;
-        this.name = name;
-        this.eMail = eMail
+    constructor(obj: IUser ) {
+        for (let key in obj) {
+            this[key] = obj[key];
+        }
     }
 
-    public getId():string {
+    public get Id():string {
         return this.id;
     }
 
-    public getName():string {
+    public get Name():string {
         return this.name;
     }
 
-    public getEMail():string {
+    public get EMail():string {
         return this.eMail;
     }
 }

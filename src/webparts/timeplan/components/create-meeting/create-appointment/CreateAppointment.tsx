@@ -2,8 +2,8 @@ import * as React from 'react';
 import styles from './CreateAppointment.module.scss';
 import { ICreateAppointmentProps } from './ICreateAppointmentProps';
 import { ICreateAppointmentState } from './ICreateAppointmentState';
-import { Appointment, IAppointment } from '../../data/Appointment/Appointment';
-import { Meeting } from '../../data/Meeting/Meeting';
+import { Appointment, IAppointment } from '../../../data/Appointment/Appointment';
+import { Meeting } from '../../../data/Meeting/Meeting';
 import { DefaultButton } from 'office-ui-fabric-react';
 import { TextField} from 'office-ui-fabric-react/lib/TextField';
 import { DatePicker, DayOfWeek, IDatePickerStrings } from 'office-ui-fabric-react/lib/DatePicker';
@@ -40,7 +40,7 @@ export class CreateAppointment extends React.Component < any, ICreateAppointment
             firstDayOfWeek: DayOfWeek.Monday,
             meetingDate: null
         };
-
+        this._onParseDateFromString = this._onParseDateFromString.bind(this);
         this._onFromInputChange = this._onFromInputChange.bind(this);
         this._onUntilInputChange = this._onUntilInputChange.bind(this);
         this._onPersonInputChange = this._onPersonInputChange.bind(this);

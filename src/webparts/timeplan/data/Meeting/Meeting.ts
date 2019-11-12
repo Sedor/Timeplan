@@ -1,16 +1,27 @@
-import { IDistribution } from "../Distributions/IDistribution";
+import { IDistribution } from '../Distributions/IDistribution';
+import { MeetingStatus } from './MeetingStatus';
+
+
+export interface IMeeting{    
+    id?: string;
+    title?: string;
+    description?: string;
+    distribution?: IDistribution;
+    status?: MeetingStatus;
+}
 
 export class Meeting{
 
-    public id: string;
-    public title: string;
-    public description: string;
-    public distribution: IDistribution;
+    id: string;
+    title: string;
+    description: string;
+    distribution: IDistribution;
+    status: MeetingStatus;
 
-    constructor(id:string, title:string, description:string){
-        this.id = id;
-        this.title = title;
-        this.description = description
+    constructor(obj: IMeeting ) {
+        for (let key in obj) {
+            this[key] = obj[key];
+        }
     }
 
     public setDistribution(distribution:IDistribution){

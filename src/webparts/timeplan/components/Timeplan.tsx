@@ -6,10 +6,8 @@ import { ITimeplanProps } from './ITimeplanProps';
 
 import { CreateMeeting } from './create-meeting/CreateMeeting';
 import { MainPage } from './mainpage/Mainpage';
-import { AddMeetingPage} from './add-meeting-page/AddMeetingPage';
-import { CreateAppointment} from './create-appointment/CreateAppointment';
-
-
+import { AddMeetingPage } from './add-meeting-page/AddMeetingPage';
+import { MeetingStatus } from './meeting-status/MeetingStatus';
 
 export default class Timeplan extends React.Component < ITimeplanProps, {} > {
   public render(): React.ReactElement<ITimeplanProps> {
@@ -19,7 +17,7 @@ export default class Timeplan extends React.Component < ITimeplanProps, {} > {
         <Switch>
             <Route path='/addMeeting' component={AddMeetingPage} exact />
             <Route path='/createMeeting' component={CreateMeeting} exact />
-            <Route path='/createAppointment' component={CreateAppointment} exact />
+            <Route path='/MeetingStatus' component={MeetingStatus} exact />
             <Route path='/' component={MainPage} exact />
             <Route render={() => <h1>Page Not found</h1> } />
           </Switch>
