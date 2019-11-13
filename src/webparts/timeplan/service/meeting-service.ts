@@ -1,21 +1,29 @@
 import { sp, ItemAddResult, spODataEntity, Item, List } from '@pnp/sp';
 import { Meeting } from '../data/Meeting/Meeting';
 import { MeetingStatus } from '../data/Meeting/MeetingStatus';
+import { DistributionNames } from '../data/Distributions/DistributionNames';
 
 export class MeetingService {
 
     static readonly meetingListName:string = 'MeetingList';
 
     public static async getMeetingList():Promise<Meeting[]> { //DONE
+        console.log('Service.algetMeetingList');
         return await sp.web.lists.getByTitle(this.meetingListName).items.get().then((itemsArray: any[]) => {
             return itemsArray.map(element => {
-                console.log(element);
+                let distributionAlg:DistributionNames
+                try {
+                    distributionAlg = element.distribution
+                } catch (error) {
+                    console.log('Distro KABOOOm');
+                    console.error(error);
+                }
                 return new Meeting({
                     id:element.Id,
                     title:element.Title,
                     description:element.akag,
-                    status: MeetingStatus[(element.status as string)]
-                    // status: "CREATED"
+                    status: MeetingStatus[(element.status as string)],
+                    distribution: distributionAlg
                 });
             })
         });

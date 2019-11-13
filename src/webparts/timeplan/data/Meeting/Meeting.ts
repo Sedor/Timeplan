@@ -1,4 +1,4 @@
-import { IDistribution } from '../Distributions/IDistribution';
+import { DistributionNames } from '../Distributions/DistributionNames';
 import { MeetingStatus } from './MeetingStatus';
 
 
@@ -6,7 +6,7 @@ export interface IMeeting{
     id?: string;
     title?: string;
     description?: string;
-    distribution?: IDistribution;
+    distribution?: DistributionNames;
     status?: MeetingStatus;
 }
 
@@ -15,7 +15,7 @@ export class Meeting{
     id: string;
     title: string;
     description: string;
-    distribution: IDistribution;
+    distribution: DistributionNames;
     status: MeetingStatus;
 
     constructor(obj: IMeeting ) {
@@ -24,7 +24,7 @@ export class Meeting{
         }
     }
 
-    public setDistribution(distribution:IDistribution){
+    public setDistribution(distribution:DistributionNames){
         this.distribution = distribution;
     }
 

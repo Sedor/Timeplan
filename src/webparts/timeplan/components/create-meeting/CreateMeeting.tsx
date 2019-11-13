@@ -5,6 +5,7 @@ import { IMeetingState } from './IMeetingState';
 import { Appointment } from '../../data/Appointment/Appointment';
 import { User,IUser } from '../../data/User/User';
 import { Meeting } from '../../data/Meeting/Meeting';
+import { MeetingStatus } from '../../data/Meeting/MeetingStatus';
 import { DefaultButton } from 'office-ui-fabric-react';
 import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
 import { TextField} from 'office-ui-fabric-react/lib/TextField';
@@ -15,6 +16,8 @@ import { Link } from 'react-router-dom';
 import { AppointmentService } from '../../service/Appointment-Service';
 import { Modal } from 'office-ui-fabric-react/lib/Modal';
 import { CreateAppointment } from './create-appointment/CreateAppointment';
+import { CreateUser } from './create-user/CreateUser';
+
 
 export class CreateMeeting extends React.Component < any, IMeetingState > {
 
@@ -31,16 +34,16 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             appointmentColumns: this._setAppointmentColumnNames(),
             isUpdate: false,
             meeting: new Meeting({
-                title: 'test'
+                title: ''
             }),  // TODO remove
             appointmentList: [],
             invitedUserList: [],
-            activated: false,
-            showModal: false,
+            clearance: false,
         };
 
         this.initializeSelection();
         
+        this._addUser = this._addUser.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.deleteAppointment = this.deleteAppointment.bind(this); // TODO maybe also delete this
         this.modifyAppointment = this.modifyAppointment.bind(this); // TODO remove
@@ -51,6 +54,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         this._onReleaseChange = this._onReleaseChange.bind(this);
         this.initializeSelection = this.initializeSelection.bind(this);
         this.createNewAppointment = this.createNewAppointment.bind(this);
+        this.inviteUser = this.inviteUser.bind(this);
     }
 
     private initializeSelection():void {
@@ -59,8 +63,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             console.log('onSelectionChanged:');
             this.setState({
                 selectedAppointment: this._getSelectedAppointment(),
-                isUpdate: this.state.isUpdate,
-                activated: this.state.activated
             })
           }
         });
@@ -82,22 +84,16 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             console.log('this.prop.location.state is defined');
             if(this.props.location.state.selectedMeeting !== undefined){
                 console.log('this.prop.location.state.selectedMeeting is defined');
-                console.log('state is:');
-                console.log(this.state);
+
                 let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
                 AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.id).then(appointmentList =>{
                     this.setState({
                         meeting: meetingToUpgrade,
                         isUpdate: true,
                         appointmentList: appointmentList,
-                        invitedUserList: [new User({
-                            name: 'Max',
-                            eMail: 'email@mail.de'
-                        })],
-                        activated: false, //TOODO get the status for this
+                        invitedUserList: [], //TODO load users
+                        clearance: (meetingToUpgrade.status === MeetingStatus.OPEN), //TOODO get the status for this
                     })
-                    console.log('state was set to:');
-                    console.log(this.state);
                 });
                 console.log('ended ComponentDidMount');
             }
@@ -117,7 +113,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     public createNewAppointment():void {
         console.log('clicked CreateNewAppointment');
         this.setState({
-            showModal: true,
+            showAppointmentModal: true,
         })
     }
 
@@ -129,11 +125,9 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         }else {
             console.log(this.state.selectedAppointment);
             this.setState({
-                showModal: true,
+                showAppointmentModal: true,
             })
         }
-        
-        
     }
 
     public deleteAppointment():void {
@@ -142,11 +136,14 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     public inviteUser():void {
-        console.log('clicked inviteUser');
+        console.log('inviteUser');
+        this.setState({
+            showUserModal:true,
+        })
     }
 
     public deleteInvitedUser():void {
-        console.log('clicked deleteInvitedUser');
+        alert('clicked deleteInvitedUser');
     }
 
     public saveMeeting():void{
@@ -155,38 +152,33 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
 
     private _onReleaseChange(checked: boolean):void {
-    
         console.log('_onReleaseChange:');
-        console.log('state is:');
-        console.log(this.state);
         this.setState({
-            isUpdate: this.state.isUpdate,
-            activated: checked,});
-        console.log('state was set to:');
-        console.log(this.state);
+            clearance: checked,});
     }
 
     private _onMeetingNameChange(meetingName:string){
-        this.state.meeting.setTitle(meetingName);
+        this.state.meeting.setTitle(meetingName);  // TODO Change this
         this.setState({  
-            meeting: this.state.meeting,
-            isUpdate: this.state.isUpdate,
-            activated: this.state.activated,});
+            meeting: this.state.meeting,});
     }
 
     private _onDropdownChange(item: IDropdownOption): void {
-        console.log(`Selection change: ${item.text} ${item.selected ? 'selected' : 'unselected'}`);
+        console.log(`Selection change: ${item.text} ${item.selected ? 'selected' : 'unselected'}`); //TODO remove
         console.log(item.key);
         this.setState({
-            isUpdate: this.state.isUpdate,
             distributionMethod: DistributionNames[item.key],
-            activated: this.state.activated,
         });
     };
 
-    private _closeModal = (): void => {
-        this.setState({ showModal: false });
-      };
+    private _closeAppointmentModal = (): void => {
+        this.setState({ showAppointmentModal: false });
+    };
+    
+    private _closeUserModal = (): void => {
+        this.setState({ showUserModal: false });
+    };
+
 
     private _addAppointment(appointment:Appointment): void{
         console.log('_addAppointment');
@@ -198,18 +190,24 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         });
     }
 
-    // options={[
-    //     { key: 'FIFO', text: 'First in First out' },
-    //     { key: 'FAIRDISTRO', text: 'Fair Distribution' },
-    //   ]}
-
+    private _deleteMeeting() {
+        alert('Would delete Meeting');
+    }
+    
+    private _addUser(user:User){
+        console.log('_addUser');
+        console.log(user);
+        this._closeUserModal();
+        let newUserlist = this.state.invitedUserList.concat([user]);
+        this.setState({
+            invitedUserList: newUserlist,
+        });
+    }
 
     private _generateDistributionDropdownOptions():IDropdownOption[] {
         let dropdownOptions:IDropdownOption[];
         dropdownOptions = [];
         for (let item in DistributionNames){
-            console.log(item);
-            console.log(DistributionNames[item]);
             dropdownOptions.push({
                 key: item,
                 text: DistributionNames[item],
@@ -232,7 +230,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
           minWidth: 50,
           maxWidth: 100,
           onRender: (item: Appointment) => {
-            return <span>Dienstag</span>;
+            return <span>Dienstag(TODO)</span>;
           }
         } as IColumn,{
           key: 'column3',
@@ -288,6 +286,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                             label='Verteilalgorithmus:'
                             placeHolder="Verteilalgo auswaehlen"
                             onChanged={this._onDropdownChange}
+                            defaultSelectedKey={DistributionNames.MANUEL}
                             options={this._generateDistributionDropdownOptions()}
                         />
                     </div>
@@ -312,12 +311,11 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     columns={this.state.userColumns}
                     // selectionPreservedOnEmptyClick={true}
                     // selection={this.selection}
-
                     checkboxVisibility={CheckboxVisibility.hidden}
                     />
                 </div> 
                 <div>
-                    <DefaultButton text='Benutzer einladen' onClick={this.inviteUser} />
+                    <DefaultButton text='Benutzer hinzufuegen' onClick={this.inviteUser} />
                     <DefaultButton text='Benutzer Loeschen' onClick={this.deleteInvitedUser} />
                 </div>
                 <div>
@@ -328,17 +326,32 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     <Link to='/'>
                         <DefaultButton text='Abbrechen' /> 
                     </Link>
+                    {this.state.isUpdate ? 
+                    <DefaultButton text='Loeschen' onClick={this._deleteMeeting} />
+                    : null}
                 </div>
             </div>
             <Modal
                 titleAriaId={'Test_Title'}
                 subtitleAriaId={'Test_Subtitle'}
-                isOpen={this.state.showModal}
-                onDismiss={this._closeModal}
+                isOpen={this.state.showUserModal}
+                onDismiss={this._closeUserModal}
+                isBlocking={false}
+                >
+                <CreateUser 
+                    closeCreateUserModal={this._closeUserModal} 
+                    addUserToList={this._addUser}
+                />
+            </Modal>
+            <Modal
+                titleAriaId={'Test_Title'}
+                subtitleAriaId={'Test_Subtitle'}
+                isOpen={this.state.showAppointmentModal}
+                onDismiss={this._closeAppointmentModal}
                 isBlocking={false}
                 >
                 <CreateAppointment 
-                    closeCreateAppointmentModal={this._closeModal} 
+                    closeCreateAppointmentModal={this._closeAppointmentModal}
                     addAppointmentToList={this._addAppointment}
                     appointmentToEdit = {this.state.selectedAppointment}
                 />

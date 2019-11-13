@@ -40,6 +40,7 @@ export class CreateAppointment extends React.Component < any, ICreateAppointment
             firstDayOfWeek: DayOfWeek.Monday,
             meetingDate: null
         };
+        
         this._onParseDateFromString = this._onParseDateFromString.bind(this);
         this._onFromInputChange = this._onFromInputChange.bind(this);
         this._onUntilInputChange = this._onUntilInputChange.bind(this);

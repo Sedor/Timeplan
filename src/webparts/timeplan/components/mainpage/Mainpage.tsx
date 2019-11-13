@@ -32,7 +32,6 @@ export class MainPage extends React.Component < any, IMainPageState > {
           selectedMeeting: this._getSelectedMeeting()})
         ;});
 
-      this.testButton = this.testButton.bind(this);
       this.initializeSelectionCallback = this.initializeSelectionCallback.bind(this);
       
     }
@@ -50,6 +49,9 @@ export class MainPage extends React.Component < any, IMainPageState > {
     }
 
     private _getSelectedMeeting():Meeting {
+      console.log('_getSelectedMeeting');
+      console.log(this.selection.getSelection()[0]);
+      
       if((this.selection.getSelection()[0] as Meeting) === undefined){
         return this.state.selectedMeeting;
       }else{
@@ -74,15 +76,24 @@ export class MainPage extends React.Component < any, IMainPageState > {
         key: 'column3',
         name: 'Status',
         fieldName: 'status',
+        minWidth: 70,
+        maxWidth: 120,
+      },{
+        key: 'column4',
+        name: 'VerteilAlgo',
+        fieldName: 'distribution',
         minWidth: 210,
         maxWidth: 350,
       },]
       return columns;
     }
 
-    public testButton():void {
-      console.log('Clicked Bearbeiten Button');
-      console.log(this.state);
+    private _clickedEditWithoutSelection(){
+      alert('Please select a Meeting')
+    }
+
+    private _clickedStatusWithoutSelection(){
+      alert('Please select a Meeting')
     }
 
     public render(): React.ReactElement<IMainPageProps> {
@@ -102,14 +113,19 @@ export class MainPage extends React.Component < any, IMainPageState > {
               <Link to='/CreateMeeting'>
                 <DefaultButton text='Neue Veranstaltung' /> 
               </Link>
-              <Link to={{
-                pathname: '/CreateMeeting',
-                state: {
-                  selectedMeeting: this.state.selectedMeeting
-                  }
-                }}>
-                <DefaultButton text='Bearbeiten' />
-              </Link> 
+            {this.state.selectedMeeting !== undefined ? 
+                <Link to={{
+                  pathname: '/CreateMeeting',
+                  state: {
+                    selectedMeeting: this.state.selectedMeeting
+                    }
+                  }}>
+                  <DefaultButton text='Bearbeiten' />
+                </Link>
+              :
+              <DefaultButton text='Bearbeiten' onClick={this._clickedEditWithoutSelection}/>
+            }
+            {this.state.selectedMeeting !== undefined ? 
               <Link to={{
                 pathname: '/MeetingStatus',
                 state: {
@@ -117,7 +133,10 @@ export class MainPage extends React.Component < any, IMainPageState > {
                   }
                 }}>
                 <DefaultButton text='Status' />
-              </Link> 
+              </Link>
+              :
+              <DefaultButton text='Status' onClick={this._clickedStatusWithoutSelection}/>
+            }
           </div>
         </div>
       </div>
