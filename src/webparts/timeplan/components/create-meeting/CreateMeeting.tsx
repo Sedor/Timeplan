@@ -194,11 +194,12 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         alert('Would delete Meeting');
     }
     
-    private _addUser(user:User){
+    private _addUser(userList:User[]){
         console.log('_addUser');
-        console.log(user);
+        console.log(userList);
+        //TODO check if Unique
         this._closeUserModal();
-        let newUserlist = this.state.invitedUserList.concat([user]);
+        let newUserlist = this.state.invitedUserList.concat(userList);
         this.setState({
             invitedUserList: newUserlist,
         });

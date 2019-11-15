@@ -96,6 +96,10 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
             UserService.createParticipantsList(null);
     }
 
+    public testUserFinding(){
+        UserService.getUserSearch(null);
+    }
+
     public render(): React.ReactElement<IAddMeetingPageProps> {
         return(
         <div>  
@@ -123,6 +127,9 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
             </div>
             <div>
                 <button onClick={this.testAssignedRoleOfCurrentUser}>Check Permission</button>
+            </div>
+            <div>
+                <button onClick={this.testUserFinding}>Find User</button>
             </div>
         </div >
         );

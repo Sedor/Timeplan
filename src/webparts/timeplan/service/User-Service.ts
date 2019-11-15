@@ -1,4 +1,5 @@
-import { sp, ItemAddResult, spODataEntity, Item, List } from '@pnp/sp';
+import { sp, ItemAddResult, spODataEntity, Item, List, SearchQuery, PrincipalSource, PrincipalType, PeoplePickerEntity  } from '@pnp/sp';
+import { graph } from "@pnp/graph";
 import { User, IUser } from '../data/User/User'
 
 export class UserService {
@@ -20,8 +21,24 @@ export class UserService {
             console.log('roleDefinitions')
             console.log(tmp);
         });
+    }
 
-        
+    public static async getUserSearch(search: string):Promise<User[]> {
+        return await sp.profiles.clientPeoplePickerSearchUser({
+            AllowEmailAddresses: true,
+            AllowMultipleEntities: true,
+            AllUrlZones: true,
+            MaximumEntitySuggestions:5,
+            PrincipalSource: PrincipalSource.All,
+            PrincipalType: PrincipalType.User,
+            QueryString: search
+        }).then( (peopleList:PeoplePickerEntity[]) => {
+            return peopleList.filter((entity:PeoplePickerEntity) => {
+                return (entity.EntityData.Email);
+            }).map( (entity:PeoplePickerEntity) => {
+                return new User({name:entity.DisplayText, eMail:entity.EntityData.Email})
+            });
+        })
     }
 
 
