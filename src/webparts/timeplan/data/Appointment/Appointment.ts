@@ -1,20 +1,31 @@
+
 export interface IAppointment{    
-    foreignMeetingId: string,
-    appointmentDate: string,
-    appointmentStart: string,
-    appointmentEnd: string,
-    personCount: string,
+    foreignMeetingId?: string,
+    appointmentDate?: Date,
+    appointmentStart?: string,
+    appointmentEnd?: string,
+    personCount?: number,
     sharepointPrimaryId?: string,
 }
 
 export class Appointment {
 
     foreignMeetingId: string;
-    appointmentDate: string;
+    appointmentDate: Date;
     appointmentStart: string;
     appointmentEnd: string;
-    personCount: string;
+    personCount: number;
     sharepointPrimaryId?: string;
+
+    private _WeekdaysGerman = [
+        'Sonntag',
+        'Montag',
+        'Dienstag',
+        'Mittwoch',
+        'Donnerstag',
+        'Freitag',
+        'Samstag',
+    ]
 
     constructor(obj: IAppointment ) {
         for (let key in obj) {
@@ -22,53 +33,20 @@ export class Appointment {
         }
     }
 
-    // public get sharepointPrimaryId():string {
-    //     return this.sharepointPrimaryId;
-    // }
+    getDayName():string {
+        return this._WeekdaysGerman[this.appointmentDate.getDay()];
+    }
 
-    // public get appointmentDate():string {
-    //     return this.appointmentDate;
-    // }
+    setDateAsDIN5008Format(dateAsString:string){
+        const values = (dateAsString || '').trim().split('.');
+        const day = values.length > 0 ? Math.max(1, Math.min(31, parseInt(values[0], 10))) : 0;
+        const month = values.length > 1 ? Math.max(1, Math.min(12, parseInt(values[1], 10))) - 1 : 0;
+        let year = values.length > 2 ? parseInt(values[2], 10) : 0; //TODO maybe include transformation if YY is inputted
+        this.appointmentDate = new Date(year, month, day);
+    }
 
-    // public get appointmentDay():string {
-    //     return this.appointmentDay;
-    // }
-
-    // public get appointmentStart():string {
-    //     return this.appointmentStart;
-    // }
-
-    // public get appointmentEnd():string {
-    //     return this.appointmentEnd;
-    // }
-
-    // public get personCount():string {
-    //     return this.personCount;
-    // }
-
-    // public set sharepointPrimaryId(sharepointPrimaryId:string) {
-    //     this.sharepointPrimaryId = sharepointPrimaryId;
-    // }
-
-    // public set appointmentDate(appointmentDate:string) {
-    //     this.appointmentDate = appointmentDate;
-    // }
-
-    // public set appointmentDay(appointmentDay:string) {
-    //     this.appointmentDay = appointmentDay;
-    // }
-
-    // public set appointmentStart(appointmentStart:string) {
-    //     this.appointmentStart = appointmentStart;
-    // }
-
-    // public set appointmentEnd(appointmentEnd:string) {
-    //     this.appointmentEnd = appointmentEnd;
-    // }
-
-    // public set personCount(personCount:string) {
-    //     this.personCount = personCount;
-    // }
-
+    getDateAsDIN5008Format():string {
+        return this.appointmentDate.getDate() + '.' + (this.appointmentDate.getMonth() + 1) + '.' + (this.appointmentDate.getFullYear());
+    }
 
 }

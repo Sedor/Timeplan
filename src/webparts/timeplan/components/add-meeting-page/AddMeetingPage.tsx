@@ -7,7 +7,7 @@ import { UserService } from '../../service/User-Service';
 import { Meeting } from '../../data/Meeting/Meeting';
 import { Appointment } from '../../data/Appointment/Appointment';
 import { AppointmentService } from '../../service/Appointment-Service';
-
+import { PermissionService } from '../../service/Permission-Service';
 
 const initialState: IAddMeetingPageState = {
     event: {
@@ -69,6 +69,10 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
         MeetingService.deleteMeetingById(4);
     }
 
+    public testPermissions(){
+        PermissionService.getUserPermission('test');
+    }
+
     public getListOfAppointmentsByMeeting() {
         console.log('getListOfAppointmentsByMeeting');
         // let appointmentlist: Appointment[];
@@ -81,14 +85,14 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
 
     public addAppointmentToFirstMeeting() {
         console.log('addAppointmentToFirstMeeting');
-        let appointment = new Appointment({
-            foreignMeetingId: '1',
-            appointmentDate: new Date().toDateString(),
-            appointmentStart: '12:00',
-            appointmentEnd: '15:00',
-            personCount: '2',
-        });
-        AppointmentService.addAppointment(appointment).then(result => {console.log('addded appointment')})
+        // let appointment = new Appointment({
+        //     foreignMeetingId: '1',
+        //     appointmentDate: new Date().toDateString(),
+        //     appointmentStart: '12:00',
+        //     appointmentEnd: '15:00',
+        //     personCount: '2',
+        // });
+        // AppointmentService.addAppointment(appointment).then(result => {console.log('addded appointment')})
     }
 
 
@@ -130,6 +134,9 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
             </div>
             <div>
                 <button onClick={this.testUserFinding}>Find User</button>
+            </div>
+            <div>
+                <button onClick={this.testPermissions}>Test Permissions</button>
             </div>
         </div >
         );

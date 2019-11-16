@@ -73,7 +73,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
           minWidth: 50,
           maxWidth: 100,
           onRender: (item: Appointment) => {
-            return <span>Dienstag(TODO)</span>;
+            return <span>{item.getDayName()}</span>;
           }
         } as IColumn,{
           key: 'column3',
@@ -91,6 +91,9 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
           key: 'column5',
           name: 'Personen',
           fieldName: 'personCount',
+          onRender: (item: Appointment) => {
+            return <span>{item.personCount}</span>;
+          },
           minWidth: 100,
           maxWidth: 350,
         } as IColumn,]

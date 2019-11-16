@@ -148,6 +148,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     public saveMeeting():void{
         alert('Would now save the Meeting');
+        
     }
 
 
@@ -221,17 +222,20 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         let columns:IColumn[] = [{
           key: 'column1',
           name: 'Datum',
-          fieldName: 'appointmentDate',
-          minWidth: 50,
-          maxWidth: 100,
-        } as IColumn,{
-          key: 'column2',
-          name: 'Tag',
-          fieldName: 'day',
+          fieldName: null,
           minWidth: 50,
           maxWidth: 100,
           onRender: (item: Appointment) => {
-            return <span>Dienstag(TODO)</span>;
+            return <span>{item.getDateAsDIN5008Format()}</span>;
+          }
+        } as IColumn,{
+          key: 'column2',
+          name: 'Tag',
+          fieldName: null,
+          minWidth: 50,
+          maxWidth: 100,
+          onRender: (item: Appointment) => {
+            return <span>{item.getDayName()}</span>;
           }
         } as IColumn,{
           key: 'column3',
@@ -248,7 +252,10 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         } as IColumn,{
           key: 'column5',
           name: 'Personen',
-          fieldName: 'personCount',
+          fieldName: null,
+          onRender: (item: Appointment) => {
+            return <span>{item.personCount}</span>;
+          },
           minWidth: 100,
           maxWidth: 350,
         } as IColumn,]
