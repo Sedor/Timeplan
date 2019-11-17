@@ -89,11 +89,15 @@ export class MainPage extends React.Component < any, IMainPageState > {
     }
 
     private _clickedEditWithoutSelection(){
-      alert('Please select a Meeting')
+      alert('Please select a Meeting');
     }
 
     private _clickedStatusWithoutSelection(){
-      alert('Please select a Meeting')
+      alert('Please select a Meeting');
+    }
+
+    private _clickedPreferenceWithoutSelection(){
+      alert('Please select a Meeting');
     }
 
     public render(): React.ReactElement<IMainPageProps> {
@@ -136,6 +140,18 @@ export class MainPage extends React.Component < any, IMainPageState > {
               </Link>
               :
               <DefaultButton text='Status' onClick={this._clickedStatusWithoutSelection}/>
+            }
+            {this.state.selectedMeeting !== undefined ? 
+              <Link to={{
+                pathname: '/SetPreference',
+                state: {
+                  selectedMeeting: this.state.selectedMeeting
+                  }
+                }}>
+                <DefaultButton text='Preference' />
+              </Link>
+              :
+              <DefaultButton text='Preference' onClick={this._clickedPreferenceWithoutSelection}/>
             }
           </div>
         </div>

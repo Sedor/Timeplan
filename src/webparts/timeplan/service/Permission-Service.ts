@@ -12,13 +12,6 @@ export class PermissionService {
             console.log(result);
         })
 
-        user = 'buri';
-        sp.web.getUserEffectivePermissions(user).then( result => {
-            console.log(user);
-            console.log('getUserEffectivePermissions');
-            console.log(result);
-        })
-
         sp.web.roleAssignments.get().then(result => {
             console.log('roleAssignments');
             console.log(result); 
