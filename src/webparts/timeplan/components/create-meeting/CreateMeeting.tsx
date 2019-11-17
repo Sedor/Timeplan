@@ -6,6 +6,7 @@ import { Appointment } from '../../data/Appointment/Appointment';
 import { User,IUser } from '../../data/User/User';
 import { Meeting } from '../../data/Meeting/Meeting';
 import { MeetingStatus } from '../../data/Meeting/MeetingStatus';
+import { MeetingService } from '../../service/Meeting-Service';
 import { DefaultButton } from 'office-ui-fabric-react';
 import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
 import { TextField} from 'office-ui-fabric-react/lib/TextField';
@@ -43,6 +44,9 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
         this.initializeSelection();
         
+        this._onMeetingDescriptionChange = this._onMeetingDescriptionChange.bind(this);
+        this._saveMeeting = this._saveMeeting.bind(this);
+        this._saveNewMeeting = this._saveNewMeeting.bind(this);
         this._addUser = this._addUser.bind(this);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.deleteAppointment = this.deleteAppointment.bind(this); // TODO maybe also delete this
@@ -146,29 +150,55 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         alert('clicked deleteInvitedUser');
     }
 
-    public saveMeeting():void{
-        alert('Would now save the Meeting');
-        
+    private _saveMeeting():void{
+        console.log('Saving Meeting');
+        // First check if meeting is an update or new one
+        if(this.state.isUpdate){
+            // its an update hooray
+            this._saveUpdatedMeeting();
+        } else {
+            this._saveNewMeeting();
+        }
+
     }
 
+    private _saveNewMeeting(){
+        console.log('_saveNewMeeting');
+        console.log(this.state.meeting);
+        MeetingService.saveMeeting(this.state.meeting);
+    }
+
+    private _saveUpdatedMeeting(){
+        console.log('_saveUpdatedMeeting');
+    }
 
     private _onReleaseChange(checked: boolean):void {
         console.log('_onReleaseChange:');
         this.setState({
-            clearance: checked,});
+            clearance: checked
+        });
     }
 
     private _onMeetingNameChange(meetingName:string){
         this.state.meeting.setTitle(meetingName);  // TODO Change this
         this.setState({  
-            meeting: this.state.meeting,});
+            meeting: this.state.meeting
+        });
+    }
+
+    private _onMeetingDescriptionChange(meetingDescription: string){
+        this.state.meeting.setDescription(meetingDescription);  // TODO Change this
+        this.setState({  
+            meeting: this.state.meeting
+        });
     }
 
     private _onDropdownChange(item: IDropdownOption): void {
-        console.log(`Selection change: ${item.text} ${item.selected ? 'selected' : 'unselected'}`); //TODO remove
+        console.log('_onDropdownChange()'); //TODO remove
         console.log(item.key);
+        this.state.meeting.distribution = DistributionNames[item.key];
         this.setState({
-            distributionMethod: DistributionNames[item.key],
+            meeting: this.state.meeting,
         });
     };
 
@@ -289,12 +319,15 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                         <TextField label='Veranstaltungsname:' placeholder='Bitte Veranstaltungsname eintragen' value={this.state.meeting.title} onChanged={this._onMeetingNameChange} required/>
                     </div>
                     <div>
+                        <TextField label='Veranstaltungsbeschreibung:' placeholder='Bitte Beschreibung eintragen' multiline rows={2} value={this.state.meeting.description} onChanged={this._onMeetingDescriptionChange} />
+                    </div>
+                    <div>
                         <Dropdown
                             required
                             label='Verteilalgorithmus:'
                             placeHolder="Verteilalgo auswaehlen"
                             onChanged={this._onDropdownChange}
-                            defaultSelectedKey={DistributionNames.MANUEL}
+                            selectedKey={this.state.meeting.distribution}
                             options={this._generateDistributionDropdownOptions()}
                         />
                     </div>
@@ -327,10 +360,10 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     <DefaultButton text='Benutzer Loeschen' onClick={this.deleteInvitedUser} />
                 </div>
                 <div>
-                    <Toggle label="Veranstaltung freigeben?" defaultChecked onText="Ja" offText="Nein" onChanged={this._onReleaseChange} />
+                    <Toggle label="Veranstaltung freigeben?" onText="Ja" offText="Nein" onChanged={this._onReleaseChange} />
                 </div>
                 <div>
-                    <DefaultButton text='Speichern' onClick={this.saveMeeting} />
+                    <DefaultButton text='Speichern' onClick={this._saveMeeting} />
                     <Link to='/'>
                         <DefaultButton text='Abbrechen' /> 
                     </Link>

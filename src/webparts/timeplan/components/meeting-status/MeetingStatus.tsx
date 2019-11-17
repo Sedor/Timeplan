@@ -60,46 +60,48 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
     }
 
     private _setAppointmentColumnNames():IColumn[] {
-        let columns:IColumn[] = [{
-          key: 'column1',
-          name: 'Datum',
-          fieldName: 'appointmentDate',
-          minWidth: 50,
-          maxWidth: 100,
-        } as IColumn,{
-          key: 'column2',
-          name: 'Tag',
-          fieldName: 'day',
-          minWidth: 50,
-          maxWidth: 100,
-          onRender: (item: Appointment) => {
-            return <span>{item.getDayName()}</span>;
-          }
-        } as IColumn,{
-          key: 'column3',
-          name: 'Von',
-          fieldName: 'appointmentStart',
-          minWidth: 100,
-          maxWidth: 350,
-        } as IColumn,{
-          key: 'column4',
-          name: 'Bis',
-          fieldName: 'appointmentEnd',
-          minWidth: 100,
-          maxWidth: 350,
-        } as IColumn,{
-          key: 'column5',
-          name: 'Personen',
-          fieldName: 'personCount',
-          onRender: (item: Appointment) => {
-            return <span>{item.personCount}</span>;
-          },
-          minWidth: 100,
-          maxWidth: 350,
-        } as IColumn,]
-        return columns;
-      }
-
+      let columns:IColumn[] = [{
+        key: 'column1',
+        name: 'Datum',
+        fieldName: null,
+        minWidth: 50,
+        maxWidth: 100,
+        onRender: (item: Appointment) => {
+          return <span>{item.getDateAsDIN5008Format()}</span>;
+        }
+      } as IColumn,{
+        key: 'column2',
+        name: 'Tag',
+        fieldName: null,
+        minWidth: 50,
+        maxWidth: 100,
+        onRender: (item: Appointment) => {
+          return <span>{item.getDayName()}</span>;
+        }
+      } as IColumn,{
+        key: 'column3',
+        name: 'Von',
+        fieldName: 'appointmentStart',
+        minWidth: 100,
+        maxWidth: 350,
+      } as IColumn,{
+        key: 'column4',
+        name: 'Bis',
+        fieldName: 'appointmentEnd',
+        minWidth: 100,
+        maxWidth: 350,
+      } as IColumn,{
+        key: 'column5',
+        name: 'Personen',
+        fieldName: null,
+        onRender: (item: Appointment) => {
+          return <span>{item.personCount}</span>;
+        },
+        minWidth: 100,
+        maxWidth: 350,
+      } as IColumn,]
+      return columns;
+    }
 
     public render(): React.ReactElement<IMeetingStatusProps> {
         return(
@@ -116,9 +118,9 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
                 </div>
             <div>
                 <Link to='/'>
-                        <DefaultButton text='Zurueck' /> 
+                    <DefaultButton text='Zurueck' /> 
                 </Link>
-                <DefaultButton text='Speichern' onClick={this.props._createUserAndAdd} />
+                <DefaultButton text='Speichern' onClick={this._saveDistribution} />
             </div>
         </div >
         );

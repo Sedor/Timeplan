@@ -65,6 +65,9 @@ export class CreateUser extends React.Component < any, ICreateUserState > {
                         noResultsFoundText: 'Person nicht vorhanden in AD'
                       }}
                     />
+                    {/* <div>
+                      <input type="file"/>
+                    </div> */}
                     <div>
                         <DefaultButton text='Abbrechen' onClick={this.props.closeCreateUserModal} />
                         <DefaultButton text='Hinzufuegen' onClick={this._createUserAndAdd} />

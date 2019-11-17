@@ -32,6 +32,10 @@ export class Meeting{
         this.title = title;
     }
 
+    public setDescription(description:string){
+        this.description = description;
+    }
+
     public getId():string {
         return this.id;
     }

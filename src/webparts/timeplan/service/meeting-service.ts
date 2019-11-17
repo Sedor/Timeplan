@@ -7,29 +7,38 @@ export class MeetingService {
 
     static readonly meetingListName:string = 'MeetingList';
 
-    public static async getMeetingList():Promise<Meeting[]> { //DONE
+    public static async getMeetingList():Promise<Meeting[]> {
         console.log('Service.algetMeetingList');
         return await sp.web.lists.getByTitle(this.meetingListName).items.get().then((itemsArray: any[]) => {
             return itemsArray.map(element => {
-                let distributionAlg:DistributionNames
-                try {
-                    distributionAlg = element.distribution
-                } catch (error) {
-                    console.log('Distro KABOOOm');
-                    console.error(error);
-                }
                 return new Meeting({
                     id:element.Id,
                     title:element.Title,
                     description:element.akag,
                     status: MeetingStatus[(element.status as string)],
-                    distribution: distributionAlg
+                    distribution: element.distribution
                 });
             })
         });
     }
 
-    public static async getMeetingById(id:string):Promise<Meeting> { //DONE
+    public static saveMeeting(meeting:Meeting):void {
+        console.log('saveMeeting');
+        console.log(meeting);
+        sp.web.lists.getByTitle(this.meetingListName).items.add({
+            Title: meeting.getTitle(),
+            akag: meeting.getDescription(),
+            status: meeting.status,
+            distribution: meeting.distribution,
+            // status: MeetingStatus[(element.status as string)],
+            // distribution: distributionAlg
+          }).then((iar: ItemAddResult) => {
+            console.log(iar);
+          });
+    }
+
+    //deprecated for now
+    public static async getMeetingById(id:string):Promise<Meeting> {
         let item = await sp.web.lists.getByTitle(this.meetingListName).items.getItemByStringId(id).get().then(
             result => {
                 return new Meeting({
@@ -41,6 +50,7 @@ export class MeetingService {
         return item;
     }
 
+    //deprecated for now
     public static async updateMeetingById(meeting:Meeting):Promise<boolean> {
         return await sp.web.lists.getByTitle(this.meetingListName).items.getItemByStringId(meeting.getId()).update({
             Title: meeting.getTitle(),
@@ -50,15 +60,6 @@ export class MeetingService {
         }).catch( () => {
             return false;
         })
-    }
-
-    public static addMeeting(meeting:Meeting):void {
-        sp.web.lists.getByTitle(this.meetingListName).items.add({
-            Title: meeting.getTitle(),
-            akag: meeting.getDescription(),
-          }).then((iar: ItemAddResult) => {
-            console.log(iar);
-          });
     }
 
     public static deleteMeetingById(meetingId:number):void {
