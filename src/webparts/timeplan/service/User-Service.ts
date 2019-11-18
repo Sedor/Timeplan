@@ -67,19 +67,14 @@ export class UserService {
         }
     }
 
-    public static async deleteAllInvitedUserForMeetingID(meetingId:string) {
+    public static async batchDeleteAllInvitedUserForMeetingID(meetingId:string) {
         let batch = sp.web.createBatch();
-        console.log('deleteAllInvitedUserForMeetingID');
+        console.log('Service.deleteAllInvitedUserForMeetingID()');
         return await this.getInvitedUserListForMeetingId(meetingId).then((userList:User[]) => {
-            // building my batch
-            console.log('before inBatch');
-            console.log(batch);
             userList.forEach( user => {
                 sp.web.lists.getByTitle(this.invitationListName).items.getItemByStringId(user.id).inBatch(batch).delete();
             });
-            console.log('after inBatch');
-            console.log(batch);
-            return batch.execute();
+            batch.execute();
         })
     } 
 

@@ -21,6 +21,7 @@ import { CreateAppointment } from './create-appointment/CreateAppointment';
 import { CreateUser } from './create-user/CreateUser';
 import { Dialog, DialogType, DialogFooter } from 'office-ui-fabric-react/lib/Dialog';
 
+
 export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     private _appointmentSelection: Selection;
@@ -166,6 +167,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     public deleteAppointment():void {
         console.log('deleteAppointment()');
         console.log(this.state);
+        
     }
 
     public inviteUser():void {
@@ -188,6 +190,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         } else {
             this._saveNewMeeting();
         }
+        this.props.history.replace('/',{});
 
     }
 
@@ -208,6 +211,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _saveUpdatedMeeting(){
+        // TODO check with shadow list
         console.log('_saveUpdatedMeeting');
     }
 
@@ -272,8 +276,11 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     private _deleteMeeting = (): void => {
         console.log('_deleteMeeting()');
-        // DO the deleting
+        this.setState({
+            showAreUSureDialog: false,
+        });
         MeetingService.deleteMeetingById(this.state.meeting.id);
+        this.props.history.replace('/',{});
     }
     
     private _addUser(userList:User[]){

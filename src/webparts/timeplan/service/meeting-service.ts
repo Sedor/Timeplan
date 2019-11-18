@@ -3,7 +3,7 @@ import { Meeting } from '../data/Meeting/Meeting';
 import { MeetingStatus } from '../data/Meeting/MeetingStatus';
 import { DistributionNames } from '../data/Distributions/DistributionNames';
 import { UserService } from './User-Service';
-
+import { AppointmentService } from './Appointment-Service';
 
 export class MeetingService {
 
@@ -40,19 +40,14 @@ export class MeetingService {
 
     public static async deleteMeetingById(meetingId:string) {
         //TODO Delete Participants and the distribution 
-        //TODO First delete all Users from InvitationList
-        //TODO Second remove all Appointments to this meeting
-        //TODO Third delete the meeting
         console.log('deleteMeetingById');
-        UserService.deleteAllInvitedUserForMeetingID(meetingId).then(result =>{
-            console.log('User deletion complete');
-            console.log(result);
-        });
-
-
-        // sp.web.lists.getByTitle(this.meetingListName).items.getById(meetingId).delete().then(_ => {
-        //     console.log('List Item Deleted')
-        // });    
+        try {
+            UserService.batchDeleteAllInvitedUserForMeetingID(meetingId);  // TODO thing about serial VS parallel
+            AppointmentService.batchDeleteAppointmentsByMeetingId(meetingId);
+            return sp.web.lists.getByTitle(this.meetingListName).items.getItemByStringId(meetingId).delete();    
+        } catch (error) {
+            return error
+        }
     }
 
 

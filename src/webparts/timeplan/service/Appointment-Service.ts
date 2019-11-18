@@ -62,6 +62,17 @@ export class AppointmentService {
         });
     }
 
+    public static async batchDeleteAppointmentsByMeetingId(meetingId:string) {
+        let batch = sp.web.createBatch();
+        console.log('Service.deleteAppointmentByMeetingId()');
+        return await this.getAppointmentListForMeetingId(meetingId).then((appointmentList:Appointment[]) => {
+            appointmentList.forEach( appointment  => {
+                sp.web.lists.getByTitle(this.appointmentListName).items.getItemByStringId(appointment.sharepointPrimaryId).inBatch(batch).delete();
+            });
+            batch.execute();
+        })
+    }
+
     // public static async getMeetingList():Promise<Meeting[]> { //DONE
     //     return await sp.web.lists.getByTitle(this.meetingListName).items.get().then((itemsArray: any[]) => {
     //         return itemsArray.map(element => {
@@ -91,11 +102,7 @@ export class AppointmentService {
     //     })
     // }
 
-    // public static deleteMeetingById(meetingId:number):void {
-    //     sp.web.lists.getByTitle(this.meetingListName).items.getById(meetingId).delete().then(_ => {
-    //         console.log('List Item Deleted')
-    //     });    
-    // }
+
 
 }
 
