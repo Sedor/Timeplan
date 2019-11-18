@@ -8,15 +8,14 @@ import { IColumn } from 'office-ui-fabric-react';
 export interface IMeetingState{
     isUpdate?: boolean,
     clearance?: boolean,
-    showAppointmentModal?:boolean,
-    showUserModal?:boolean,
     userColumns?:IColumn[],
     appointmentColumns?:IColumn[],
     selectedAppointment?:Appointment,
     selectedUser?:User,
     meeting?:Meeting,
-    distributionMethod?: DistributionNames,
     appointmentList?: Appointment[],
     invitedUserList?: User[],
     showAreUSureDialog?: boolean,
+    showAppointmentModal?:boolean,
+    showUserModal?:boolean,
 }

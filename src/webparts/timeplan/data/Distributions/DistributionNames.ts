@@ -1,5 +1,5 @@
 export enum DistributionNames {
-    FIFO = 'First in First out',
-    FAIRDISTRO = 'Fair Distribution',
-    MANUEL = 'Manual Distribution'
+    FIFO = <any> 'First in First out',
+    FAIRDISTRO = <any> 'Fair Distribution',
+    MANUEL = <any> 'Manual Distribution'
 }

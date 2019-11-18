@@ -25,12 +25,13 @@ import { Dialog, DialogType, DialogFooter } from 'office-ui-fabric-react/lib/Dia
 export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     private _appointmentSelection: Selection;
-    private _userSelection: Selection
+    private _userSelection: Selection;
+    private _generatedDropdownOptions: IDropdownOption[];
 
     constructor(props: any){
         super(props);
        
-        console.log('in Constructor');
+        console.log('CreateMeeting.Constructor()');
         console.log('state is:');
         console.log(this.state);
         this.state = {
@@ -44,7 +45,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             invitedUserList: [],
             clearance: false,
         };
-
+        this._generatedDropdownOptions = this._generateDistributionDropdownOptions();
         this._initializeAppointmentSelection();
         this._initializeUserSelection();
         
@@ -108,11 +109,9 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     componentDidMount(){
         window.addEventListener("beforeunload", this._handleWindowBeforeUnload);
-        console.log('in ComponentDidMount');
+        console.log('componentDidMount()');
         if(this.props.location.state !== undefined){
-            console.log('this.prop.location.state is defined');
             if(this.props.location.state.selectedMeeting !== undefined){
-                console.log('this.prop.location.state.selectedMeeting is defined');
                 let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
                 this.setState({
                     meeting: meetingToUpgrade,
@@ -298,13 +297,24 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         let dropdownOptions:IDropdownOption[];
         dropdownOptions = [];
         for (let item in DistributionNames){
-            dropdownOptions.push({
-                key: item,
-                text: DistributionNames[item],
-            });
+            if(!(dropdownOptions.some(e => e.text === item))){
+                dropdownOptions.push({
+                    key: item,
+                    text: DistributionNames[item],
+                });
+            }
         }
+        console.log(dropdownOptions);
         return dropdownOptions;
     }
+
+    // 0: {key: "FIFO", text: "First in First out"}
+    // 1: {key: "First in First out", text: "FIFO"}
+    // 2: {key: "FAIRDISTRO", text: "Fair Distribution"}
+    // 3: {key: "Fair Distribution", text: "FAIRDISTRO"}
+    // 4: {key: "MANUEL", text: "Manual Distribution"}
+    // 5: {key: "Manual Distribution", text: "MANUEL"}
+
 
     private _setAppointmentColumnNames():IColumn[] {
         let columns:IColumn[] = [{
@@ -385,8 +395,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                             label='Verteilalgorithmus:'
                             placeHolder="Verteilalgo auswaehlen"
                             onChanged={this._onDropdownChange}
-                            selectedKey={this.state.meeting.distribution}
-                            options={this._generateDistributionDropdownOptions()}
+                            selectedKey={DistributionNames[this.state.meeting.distribution]}
+                            options={this._generatedDropdownOptions}
                         />
                     </div>
                 </div>
