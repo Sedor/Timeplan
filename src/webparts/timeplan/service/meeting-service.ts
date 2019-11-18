@@ -2,6 +2,8 @@ import { sp, ItemAddResult, spODataEntity, Item, List } from '@pnp/sp';
 import { Meeting } from '../data/Meeting/Meeting';
 import { MeetingStatus } from '../data/Meeting/MeetingStatus';
 import { DistributionNames } from '../data/Distributions/DistributionNames';
+import { UserService } from './User-Service';
+
 
 export class MeetingService {
 
@@ -30,10 +32,29 @@ export class MeetingService {
             akag: meeting.getDescription(),
             status: meeting.status,
             distribution: meeting.distribution,
-            }).then((itemResult:ItemAddResult)=>{
-                return itemResult.data.ID;
-            })
+        }).then((itemResult:ItemAddResult)=>{
+            return itemResult.data.ID;
+        })
     }
+
+
+    public static async deleteMeetingById(meetingId:string) {
+        //TODO Delete Participants and the distribution 
+        //TODO First delete all Users from InvitationList
+        //TODO Second remove all Appointments to this meeting
+        //TODO Third delete the meeting
+        console.log('deleteMeetingById');
+        UserService.deleteAllInvitedUserForMeetingID(meetingId).then(result =>{
+            console.log('User deletion complete');
+            console.log(result);
+        });
+
+
+        // sp.web.lists.getByTitle(this.meetingListName).items.getById(meetingId).delete().then(_ => {
+        //     console.log('List Item Deleted')
+        // });    
+    }
+
 
     //deprecated for now
     public static async getMeetingById(id:string):Promise<Meeting> {
@@ -58,12 +79,6 @@ export class MeetingService {
         }).catch( () => {
             return false;
         })
-    }
-
-    public static deleteMeetingById(meetingId:number):void {
-        sp.web.lists.getByTitle(this.meetingListName).items.getById(meetingId).delete().then(_ => {
-            console.log('List Item Deleted')
-        });    
     }
 
 }

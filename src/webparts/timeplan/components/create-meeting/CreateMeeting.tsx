@@ -8,7 +8,7 @@ import { Meeting } from '../../data/Meeting/Meeting';
 import { MeetingStatus } from '../../data/Meeting/MeetingStatus';
 import { MeetingService } from '../../service/Meeting-Service';
 import { UserService } from '../../service/User-Service';
-import { DefaultButton } from 'office-ui-fabric-react';
+import { DefaultButton, PrimaryButton } from 'office-ui-fabric-react';
 import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
 import { TextField} from 'office-ui-fabric-react/lib/TextField';
 import { DetailsList, Selection, IColumn, CheckboxVisibility} from 'office-ui-fabric-react/lib/DetailsList';
@@ -19,7 +19,7 @@ import { AppointmentService } from '../../service/Appointment-Service';
 import { Modal } from 'office-ui-fabric-react/lib/Modal';
 import { CreateAppointment } from './create-appointment/CreateAppointment';
 import { CreateUser } from './create-user/CreateUser';
-
+import { Dialog, DialogType, DialogFooter } from 'office-ui-fabric-react/lib/Dialog';
 
 export class CreateMeeting extends React.Component < any, IMeetingState > {
 
@@ -52,7 +52,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         this._saveMeeting = this._saveMeeting.bind(this);
         this._saveNewMeeting = this._saveNewMeeting.bind(this);
         this._addUser = this._addUser.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.deleteAppointment = this.deleteAppointment.bind(this); // TODO maybe also delete this
         this.modifyAppointment = this.modifyAppointment.bind(this); // TODO remove
         this._onDropdownChange = this._onDropdownChange.bind(this);
@@ -154,7 +153,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     public modifyAppointment():void {
         console.log('clicked modifyAppointment');
         if(this.state.selectedAppointment === undefined || this.state.selectedAppointment === null){
-            alert('You didnt select an Appointment');
+            alert('You didnt select an Appointment'); // TODO remove
             console.log(this.state.selectedAppointment);
         }else {
             console.log(this.state.selectedAppointment);
@@ -250,6 +249,10 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         this.setState({ showUserModal: false });
     };
 
+    private _closeAreUSureDialog = (): void => {
+        console.log('_closeAreUSureDialog()');
+        this.setState({ showAreUSureDialog: false});
+    }
 
     private _addAppointment(appointment:Appointment): void{
         console.log('_addAppointment');
@@ -260,8 +263,17 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         });
     }
 
-    private _deleteMeeting() {
-        alert('Would delete Meeting');
+    private _deleteMeetingButton = (): void => {
+        console.log('_deleteMeetingButton()');
+        this.setState({
+            showAreUSureDialog: true,
+        });
+    }
+
+    private _deleteMeeting = (): void => {
+        console.log('_deleteMeeting()');
+        // DO the deleting
+        MeetingService.deleteMeetingById(this.state.meeting.id);
     }
     
     private _addUser(userList:User[]){
@@ -405,13 +417,25 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                         <DefaultButton text='Abbrechen' /> 
                     </Link>
                     {this.state.isUpdate ? 
-                    <DefaultButton text='Loeschen' onClick={this._deleteMeeting} />
+                    <DefaultButton text='Loeschen' onClick={this._deleteMeetingButton} />
                     : null}
                 </div>
             </div>
+            <Dialog
+              isOpen={this.state.showAreUSureDialog}
+              onDismiss={this._closeAreUSureDialog}
+              title='Veranstaltung loeschen?'
+              subText='Wollen Sie wirklich die Veranstaltung unwiederuflich loeschen?'
+              isBlocking={true}
+              >
+              <DialogFooter>
+                  <PrimaryButton onClick={this._deleteMeeting} text="Loeschen" />
+                  <DefaultButton onClick={this._closeAreUSureDialog} text="Abbrechen" />
+              </DialogFooter>
+              </Dialog>
             <Modal
-                titleAriaId={'Test_Title'}
-                subtitleAriaId={'Test_Subtitle'}
+                titleAriaId={'Test_Title'} // TODO remove
+                subtitleAriaId={'Test_Subtitle'} // TODO remove
                 isOpen={this.state.showUserModal}
                 onDismiss={this._closeUserModal}
                 isBlocking={false}
@@ -422,8 +446,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 />
             </Modal>
             <Modal
-                titleAriaId={'Test_Title'}
-                subtitleAriaId={'Test_Subtitle'}
+                titleAriaId={'Test_Title'} // TODO remove
+                subtitleAriaId={'Test_Subtitle'} // TODO remove
                 isOpen={this.state.showAppointmentModal}
                 onDismiss={this._closeAppointmentModal}
                 isBlocking={false}

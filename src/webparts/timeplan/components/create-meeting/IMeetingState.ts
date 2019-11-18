@@ -18,6 +18,5 @@ export interface IMeetingState{
     distributionMethod?: DistributionNames,
     appointmentList?: Appointment[],
     invitedUserList?: User[],
-    
-    
+    showAreUSureDialog?: boolean,
 }

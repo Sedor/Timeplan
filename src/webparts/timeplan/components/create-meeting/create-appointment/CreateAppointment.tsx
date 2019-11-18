@@ -35,7 +35,8 @@ export class CreateAppointment extends React.Component < any, ICreateAppointment
     constructor(props: any){
         super(props);        
         this.state = {
-            meetingDate: null
+            meetingDate: null,
+            persons: 1
         };
         
         this._onParseDateFromString = this._onParseDateFromString.bind(this);
@@ -106,7 +107,7 @@ export class CreateAppointment extends React.Component < any, ICreateAppointment
         console.log('_onNotifyValidationResult for Person');
         console.log(errorMessage);
         console.log(value);
-        
+        //TODO validate Persons
     }
 
     public render(): React.ReactElement<ICreateAppointmentProps> {

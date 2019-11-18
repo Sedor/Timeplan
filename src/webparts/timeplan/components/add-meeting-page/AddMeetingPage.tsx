@@ -66,7 +66,7 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
 
     public deleteMeetingWithID4():void {
         console.log('Delete Meeting with ID 4')
-        MeetingService.deleteMeetingById(4);
+        MeetingService.deleteMeetingById('4');
     }
 
     public testPermissions(){
