@@ -97,7 +97,7 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
 
 
     public testAssignedRoleOfCurrentUser() {
-            UserService.createParticipantsList(null);
+            // UserService.createParticipantsList(null);
     }
 
     public testUserFinding(){

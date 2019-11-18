@@ -13,9 +13,11 @@ export interface IMeetingState{
     userColumns?:IColumn[],
     appointmentColumns?:IColumn[],
     selectedAppointment?:Appointment,
+    selectedUser?:User,
     meeting?:Meeting,
     distributionMethod?: DistributionNames,
     appointmentList?: Appointment[],
     invitedUserList?: User[],
+    
     
 }

@@ -8,33 +8,31 @@ export class MeetingService {
     static readonly meetingListName:string = 'MeetingList';
 
     public static async getMeetingList():Promise<Meeting[]> {
-        console.log('Service.algetMeetingList');
+        console.log('Service.getMeetingList');
         return await sp.web.lists.getByTitle(this.meetingListName).items.get().then((itemsArray: any[]) => {
             return itemsArray.map(element => {
                 return new Meeting({
                     id:element.Id,
                     title:element.Title,
                     description:element.akag,
-                    status: MeetingStatus[(element.status as string)],
+                    status: element.status,
                     distribution: element.distribution
                 });
             })
         });
     }
 
-    public static saveMeeting(meeting:Meeting):void {
-        console.log('saveMeeting');
+    public static async saveMeeting(meeting:Meeting):Promise<string> {
+        console.log('Service.saveMeeting');
         console.log(meeting);
-        sp.web.lists.getByTitle(this.meetingListName).items.add({
+        return await sp.web.lists.getByTitle(this.meetingListName).items.add({
             Title: meeting.getTitle(),
             akag: meeting.getDescription(),
             status: meeting.status,
             distribution: meeting.distribution,
-            // status: MeetingStatus[(element.status as string)],
-            // distribution: distributionAlg
-          }).then((iar: ItemAddResult) => {
-            console.log(iar);
-          });
+            }).then((itemResult:ItemAddResult)=>{
+                return itemResult.data.ID;
+            })
     }
 
     //deprecated for now

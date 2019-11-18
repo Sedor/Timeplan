@@ -1,6 +1,5 @@
 
 export interface IAppointment{    
-    foreignMeetingId?: string,
     appointmentDate?: Date,
     appointmentStart?: string,
     appointmentEnd?: string,
@@ -10,7 +9,6 @@ export interface IAppointment{
 
 export class Appointment {
 
-    foreignMeetingId: string;
     appointmentDate: Date;
     appointmentStart: string;
     appointmentEnd: string;

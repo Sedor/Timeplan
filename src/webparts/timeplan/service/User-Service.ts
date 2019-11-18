@@ -1,25 +1,32 @@
-import { sp, ItemAddResult, spODataEntity, Item, List, SearchQuery, PrincipalSource, PrincipalType, PeoplePickerEntity  } from '@pnp/sp';
-import { graph } from "@pnp/graph";
-import { User, IUser } from '../data/User/User'
+import { sp, ItemAddResult, PrincipalType, PrincipalSource, PeoplePickerEntity  } from '@pnp/sp';
+import { User } from '../data/User/User'
 
 export class UserService {
 
-    static readonly userListName:string = 'UserList';
+    static readonly invitationListName:string = 'Invitation';
 
-    public static async createParticipantsList(callingUser){
-        sp.web.getCurrentUserEffectivePermissions().then(perms => {
-            console.log('perms')
-            console.log(perms);
-        });
 
-        sp.web.currentUser.get().then(tmp => {
-            console.log('currentUser')
-            console.log(tmp);
-        });
+    public static async saveInvitedUser(meetingId:string, user:User){
+        console.log('Service.saveInvitedUser()');
+        console.log(user);
+        return await sp.web.lists.getByTitle(this.invitationListName).items.add({
+            Title: String(meetingId),
+            UserName: user.name,
+            UserEmail: user.eMail
+        })
+    }
 
-        sp.web.roleDefinitions.get().then(tmp => {
-            console.log('roleDefinitions')
-            console.log(tmp);
+    //TODO Ask if userEmail is unique (one problem is Admin account has the same as User account)
+    public static async saveInvitedUsers(meetingId:string, userList: User[]){
+        console.log('Service.saveInvitedUsers()');
+        console.log(meetingId);
+        console.log(userList);
+        userList.forEach((user:User)=>{
+            try {
+                this.saveInvitedUser(meetingId, user);
+            } catch (error) {
+                return error;
+            }
         });
     }
 
@@ -28,7 +35,7 @@ export class UserService {
             AllowEmailAddresses: true,
             AllowMultipleEntities: true,
             AllUrlZones: true,
-            MaximumEntitySuggestions:5,
+            MaximumEntitySuggestions:7,
             PrincipalSource: PrincipalSource.All,
             PrincipalType: PrincipalType.User,
             QueryString: search
@@ -36,59 +43,29 @@ export class UserService {
             return peopleList.filter((entity:PeoplePickerEntity) => {
                 return (entity.EntityData.Email);
             }).map( (entity:PeoplePickerEntity) => {
-                return new User({name:entity.DisplayText, eMail:entity.EntityData.Email})
+                return new User({
+                    name:entity.DisplayText, 
+                    eMail:entity.EntityData.Email
+                });
             });
         })
     }
 
-
-    // sp.web.getCurrentUserEffectivePermissions().then(perms => {
-
-    //     Logger.writeJSON(perms);
-    // });
-
-
-    // public static async getUserList(meetingId:String):Promise<User[]> { //DONE
-    //     return await sp.web.lists.getByTitle(this.userListName).items.get().then((itemsArray: any[]) => {
-    //         return itemsArray.map(element => {
-    //             return new Meeting(element.Id, element.Title, element.akag);
-    //         })
-    //     });
-    // }
-
-    // public static async getMeetingById(id:string):Promise<Meeting> { //DONE
-    //     let item = await sp.web.lists.getByTitle(this.meetingListName).items.getItemByStringId(id).get().then(
-    //         result => {
-    //             return new Meeting(result.Id, result.Title,result.akag);
-    //         });
-    //     return item;
-    // }
-
-    // public static async updateMeetingById(meeting:Meeting):Promise<boolean> {
-    //     return await sp.web.lists.getByTitle(this.meetingListName).items.getItemByStringId(meeting.getId()).update({
-    //         Title: meeting.getTitle(),
-    //         akag: meeting.getDescription(),
-    //     }).then( () => {
-    //         return true;
-    //     }).catch( () => {
-    //         return false;
-    //     })
-    // }
-
-    // public static addMeeting(meeting:Meeting):void {
-    //     sp.web.lists.getByTitle(this.meetingListName).items.add({
-    //         Title: meeting.getTitle(),
-    //         akag: meeting.getDescription(),
-    //       }).then((iar: ItemAddResult) => {
-    //         console.log(iar);
-    //       });
-    // }
-
-    // public static deleteMeetingById(meetingId:number):void {
-    //     sp.web.lists.getByTitle(this.meetingListName).items.getById(meetingId).delete().then(_ => {
-    //         console.log('List Item Deleted')
-    //     });    
-    // }
+    public static async getInvitedUserListForMeetingId(meetingId:string):Promise<User[]> { 
+        try {
+            return await sp.web.lists.getByTitle(this.invitationListName).items.filter(`Title eq ${meetingId}`).get().then((itemsArray: any[]) => {
+                return itemsArray.map(element => {
+                    return new User({
+                        id: element.Id,
+                        name: element.UserName,
+                        eMail: element.UserEmail,
+                    });
+                })
+            });
+        } catch (error) {
+            return error
+        }
+    }
 
 }
 

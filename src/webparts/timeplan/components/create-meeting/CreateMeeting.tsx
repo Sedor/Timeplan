@@ -7,6 +7,7 @@ import { User,IUser } from '../../data/User/User';
 import { Meeting } from '../../data/Meeting/Meeting';
 import { MeetingStatus } from '../../data/Meeting/MeetingStatus';
 import { MeetingService } from '../../service/Meeting-Service';
+import { UserService } from '../../service/User-Service';
 import { DefaultButton } from 'office-ui-fabric-react';
 import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
 import { TextField} from 'office-ui-fabric-react/lib/TextField';
@@ -22,7 +23,8 @@ import { CreateUser } from './create-user/CreateUser';
 
 export class CreateMeeting extends React.Component < any, IMeetingState > {
 
-    private selection: Selection;
+    private _appointmentSelection: Selection;
+    private _userSelection: Selection
 
     constructor(props: any){
         super(props);
@@ -42,8 +44,10 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             clearance: false,
         };
 
-        this.initializeSelection();
+        this._initializeAppointmentSelection();
+        this._initializeUserSelection();
         
+
         this._onMeetingDescriptionChange = this._onMeetingDescriptionChange.bind(this);
         this._saveMeeting = this._saveMeeting.bind(this);
         this._saveNewMeeting = this._saveNewMeeting.bind(this);
@@ -56,13 +60,14 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         this._onMeetingNameChange = this._onMeetingNameChange.bind(this);
         this._getSelectedAppointment = this._getSelectedAppointment.bind(this);
         this._onReleaseChange = this._onReleaseChange.bind(this);
-        this.initializeSelection = this.initializeSelection.bind(this);
+        this._initializeAppointmentSelection = this._initializeAppointmentSelection.bind(this);
+        this._initializeUserSelection = this._initializeUserSelection.bind(this);
         this.createNewAppointment = this.createNewAppointment.bind(this);
         this.inviteUser = this.inviteUser.bind(this);
     }
 
-    private initializeSelection():void {
-        this.selection = new Selection({
+    private _initializeAppointmentSelection():void {
+        this._appointmentSelection = new Selection({
           onSelectionChanged: () => {
             console.log('onSelectionChanged:');
             this.setState({
@@ -72,12 +77,32 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         });
     }
 
+    private _initializeUserSelection():void {
+        this._userSelection = new Selection({
+          onSelectionChanged: () => {
+            console.log('onUserSelectionChanged()');
+            this.setState({
+                selectedUser: this._getSelectedUser(),
+            })
+          }
+        });
+    }
+
     private _getSelectedAppointment():Appointment {
-        console.log(this.selection);
-        if((this.selection.getSelection()[0] as Appointment) === undefined){
+        console.log(this._appointmentSelection);
+        if((this._appointmentSelection.getSelection()[0] as Appointment) === undefined){
             return this.state.selectedAppointment;
         }else{
-            return (this.selection.getSelection()[0] as Appointment);
+            return (this._appointmentSelection.getSelection()[0] as Appointment);
+        }
+    }
+
+    private _getSelectedUser():User {
+        console.log(this._userSelection);
+        if((this._userSelection.getSelection()[0] as User) === undefined){
+            return this.state.selectedUser;
+        }else{
+            return (this._userSelection.getSelection()[0] as User);
         }
     }
 
@@ -88,17 +113,22 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             console.log('this.prop.location.state is defined');
             if(this.props.location.state.selectedMeeting !== undefined){
                 console.log('this.prop.location.state.selectedMeeting is defined');
-
                 let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
-                AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.id).then(appointmentList =>{
-                    this.setState({
-                        meeting: meetingToUpgrade,
-                        isUpdate: true,
-                        appointmentList: appointmentList,
-                        invitedUserList: [], //TODO load users
-                        clearance: (meetingToUpgrade.status === MeetingStatus.OPEN), //TOODO get the status for this
-                    })
+                this.setState({
+                    meeting: meetingToUpgrade,
+                    isUpdate: true,
+                    clearance: (meetingToUpgrade.status === MeetingStatus.OPEN),
                 });
+                AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.id).then((appointmentList:Appointment[]) =>{
+                    this.setState({
+                        appointmentList: appointmentList,
+                    });
+                });
+                UserService.getInvitedUserListForMeetingId(meetingToUpgrade.id).then((userList:User[])=>{
+                    this.setState({
+                        invitedUserList: userList,
+                    });
+                })
                 console.log('ended ComponentDidMount');
             }
         }
@@ -135,12 +165,12 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     public deleteAppointment():void {
-        console.log('clicked deleteAppointment');
+        console.log('deleteAppointment()');
         console.log(this.state);
     }
 
     public inviteUser():void {
-        console.log('inviteUser');
+        console.log('inviteUser()');
         this.setState({
             showUserModal:true,
         })
@@ -165,7 +195,17 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     private _saveNewMeeting(){
         console.log('_saveNewMeeting');
         console.log(this.state.meeting);
-        MeetingService.saveMeeting(this.state.meeting);
+        try {
+            MeetingService.saveMeeting(this.state.meeting).then((meetingId:string)=> {
+                console.log('_saveNewMeeting() inner loop');
+                console.log(meetingId);
+                AppointmentService.saveAppointments(meetingId, this.state.appointmentList);
+                UserService.saveInvitedUsers(meetingId, this.state.invitedUserList);
+            });
+        } catch (error) {
+            
+        }
+        
     }
 
     private _saveUpdatedMeeting(){
@@ -213,7 +253,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     private _addAppointment(appointment:Appointment): void{
         console.log('_addAppointment');
-        appointment.foreignMeetingId = this.state.meeting.id;
         console.log(appointment);
         let newAppointmentList = this.state.appointmentList.concat([appointment]);
         this.setState({
@@ -336,8 +375,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     <DetailsList
                     items={this.state.appointmentList}
                     columns={this.state.appointmentColumns}
-                    // selectionPreservedOnEmptyClick={true}
-                    selection={this.selection}
+                    selection={this._appointmentSelection}
                     checkboxVisibility={CheckboxVisibility.hidden}
                     />
                 </div>
@@ -350,8 +388,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     <DetailsList
                     items={this.state.invitedUserList}
                     columns={this.state.userColumns}
-                    // selectionPreservedOnEmptyClick={true}
-                    // selection={this.selection}
+                    selection={this._userSelection}
                     checkboxVisibility={CheckboxVisibility.hidden}
                     />
                 </div> 

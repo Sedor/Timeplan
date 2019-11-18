@@ -89,7 +89,6 @@ export class CreateAppointment extends React.Component < any, ICreateAppointment
     private _saveAppointmentToList(){
         console.log('_saveAppointmentToList');
         let appointment= new Appointment({
-            foreignMeetingId: this.props.foreignMeetingId,
             appointmentDate: this.state.meetingDate,
             appointmentStart: this.state.from,
             appointmentEnd: this.state.until,
@@ -107,7 +106,6 @@ export class CreateAppointment extends React.Component < any, ICreateAppointment
         console.log('_onNotifyValidationResult for Person');
         console.log(errorMessage);
         console.log(value);
-        console.log('------------------------');
         
     }
 
