@@ -30,7 +30,7 @@ const DayPickerStrings: IDatePickerStrings = {
   };
 
 
-export class CreateAppointment extends React.Component < any, ICreateAppointmentState > {
+export class CreateAppointment extends React.Component < ICreateAppointmentProps, ICreateAppointmentState > {
 
     constructor(props: any){
         super(props);        
@@ -69,6 +69,19 @@ export class CreateAppointment extends React.Component < any, ICreateAppointment
         return new Date(year, month, day);
     };
 
+    componentDidMount(){
+        console.log('CreateAppointment.componentDidMount()');
+        if(this.props.isUpdate){
+            this.setState({
+                from: this.props.appointmentToEdit.appointmentStart,
+                until: this.props.appointmentToEdit.appointmentEnd,
+                meetingDate: new Date(this.props.appointmentToEdit.appointmentDate.getTime()), //making a new referenced Object
+                persons: this.props.appointmentToEdit.personCount,
+            });
+        }
+    }
+
+
     private _onFromInputChange(from:string){
         this.setState({
             from: from,
@@ -88,19 +101,22 @@ export class CreateAppointment extends React.Component < any, ICreateAppointment
     }
 
     private _saveAppointmentToList(){
-        console.log('_saveAppointmentToList');
-        let appointment= new Appointment({
+        console.log('CreateAppointment._saveAppointmentToList()');
+        //TODO input verification
+        let newAppointment= new Appointment({
             appointmentDate: this.state.meetingDate,
             appointmentStart: this.state.from,
             appointmentEnd: this.state.until,
             personCount: this.state.persons,
         });
-        console.log(appointment);
-        console.log('calling callback to add to list');
-        //TODO verify Appointment
+        if(this.props.isUpdate){
+            console.log('updating');
+            this.props.updateAppointment(this.props.appointmentToEdit,newAppointment);
+        }else{
+            console.log('just adding');
+            this.props.addAppointmentToList(newAppointment);
+        }
         this.props.closeCreateAppointmentModal();
-        this.props.addAppointmentToList(appointment);
-        
     }
 
     private _onNotifyValidationResult(errorMessage: string, value: string){

@@ -20,7 +20,7 @@ import { Modal } from 'office-ui-fabric-react/lib/Modal';
 import { CreateAppointment } from './create-appointment/CreateAppointment';
 import { CreateUser } from './create-user/CreateUser';
 import { Dialog, DialogType, DialogFooter } from 'office-ui-fabric-react/lib/Dialog';
-
+import { IObjectWithKey } from 'office-ui-fabric-react/lib/DetailsList';
 
 export class CreateMeeting extends React.Component < any, IMeetingState > {
 
@@ -40,10 +40,11 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             isUpdate: false,
             meeting: new Meeting({
                 title: ''
-            }),  // TODO remove
+            }),
             appointmentList: [],
             invitedUserList: [],
             clearance: false,
+            appointmentIsUpdating: false,
         };
         this._generatedDropdownOptions = this._generateDistributionDropdownOptions();
         this._initializeAppointmentSelection();
@@ -59,7 +60,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         this._onDropdownChange = this._onDropdownChange.bind(this);
         this._addAppointment = this._addAppointment.bind(this);
         this._onMeetingNameChange = this._onMeetingNameChange.bind(this);
-        this._getSelectedAppointment = this._getSelectedAppointment.bind(this);
         this._onReleaseChange = this._onReleaseChange.bind(this);
         this._initializeAppointmentSelection = this._initializeAppointmentSelection.bind(this);
         this._initializeUserSelection = this._initializeUserSelection.bind(this);
@@ -70,10 +70,12 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     private _initializeAppointmentSelection():void {
         this._appointmentSelection = new Selection({
           onSelectionChanged: () => {
-            console.log('onSelectionChanged:');
-            this.setState({
-                selectedAppointment: this._getSelectedAppointment(),
-            })
+            console.log('onAppointmentSelectionChanged()');
+            if(!((this._appointmentSelection.getSelection()[0] as Appointment) === undefined)){
+                this.setState({
+                    selectedAppointment: (this._appointmentSelection.getSelection()[0] as Appointment),
+                })
+            }  
           }
         });
     }
@@ -81,30 +83,14 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     private _initializeUserSelection():void {
         this._userSelection = new Selection({
           onSelectionChanged: () => {
-            console.log('onUserSelectionChanged()');
-            this.setState({
-                selectedUser: this._getSelectedUser(),
-            })
+             console.log('onUserSelectionChanged()');
+             if(!((this._userSelection.getSelection()[0] as User) === undefined)){
+                this.setState({
+                    selectedUser: (this._userSelection.getSelection()[0] as User),
+                });
+             }
           }
         });
-    }
-
-    private _getSelectedAppointment():Appointment {
-        console.log(this._appointmentSelection);
-        if((this._appointmentSelection.getSelection()[0] as Appointment) === undefined){
-            return this.state.selectedAppointment;
-        }else{
-            return (this._appointmentSelection.getSelection()[0] as Appointment);
-        }
-    }
-
-    private _getSelectedUser():User {
-        console.log(this._userSelection);
-        if((this._userSelection.getSelection()[0] as User) === undefined){
-            return this.state.selectedUser;
-        }else{
-            return (this._userSelection.getSelection()[0] as User);
-        }
     }
 
     componentDidMount(){
@@ -128,7 +114,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                         invitedUserList: userList,
                     });
                 })
-                console.log('ended ComponentDidMount');
             }
         }
     }
@@ -150,14 +135,13 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         })
     }
 
-    public modifyAppointment():void {
-        console.log('clicked modifyAppointment');
+    public modifyAppointment = ():void => {
+        console.log('CreateMeeting.modifyAppointment()');
         if(this.state.selectedAppointment === undefined || this.state.selectedAppointment === null){
             alert('You didnt select an Appointment'); // TODO remove
-            console.log(this.state.selectedAppointment);
         }else {
-            console.log(this.state.selectedAppointment);
             this.setState({
+                appointmentIsUpdating: true,
                 showAppointmentModal: true,
             })
         }
@@ -203,7 +187,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             this._saveNewMeeting();
         }
         this.props.history.replace('/',{});
-
     }
 
     private _saveNewMeeting(){
@@ -271,13 +254,24 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _addAppointment(appointment:Appointment): void{
-        console.log('_addAppointment');
-        console.log(appointment);
+        console.log('CreateMeeting._addAppointment()');
         let newAppointmentList = this.state.appointmentList.concat([appointment]);
         this.setState({
             appointmentList: newAppointmentList,
         });
     }
+
+    private _updateAppointment = (appointmentReference:Appointment, updatedAppointment:Appointment) => {
+        console.log('CreateMeeting._updateAppointment()');
+        appointmentReference.appointmentDate = new Date(updatedAppointment.appointmentDate.getTime());
+        appointmentReference.appointmentEnd = updatedAppointment.appointmentEnd;
+        appointmentReference.appointmentStart = updatedAppointment.appointmentStart;
+        appointmentReference.personCount =  updatedAppointment.personCount;
+        this.setState({
+            appointmentIsUpdating: false,
+        });
+    }
+
 
     private _deleteMeetingButton = (): void => {
         console.log('_deleteMeetingButton()');
@@ -410,6 +404,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     columns={this.state.appointmentColumns}
                     selection={this._appointmentSelection}
                     checkboxVisibility={CheckboxVisibility.hidden}
+                    setKey='id'
                     />
                 </div>
                 <div>
@@ -478,6 +473,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     closeCreateAppointmentModal={this._closeAppointmentModal}
                     addAppointmentToList={this._addAppointment}
                     appointmentToEdit = {this.state.selectedAppointment}
+                    updateAppointment = {this._updateAppointment}
+                    isUpdate = {this.state.appointmentIsUpdating}
                 />
             </Modal>
         </div>

@@ -11,6 +11,7 @@ export interface IMeetingState{
     userColumns?:IColumn[],
     appointmentColumns?:IColumn[],
     selectedAppointment?:Appointment,
+    selectedAppointmentIndex?:number,
     selectedUser?:User,
     meeting?:Meeting,
     appointmentList?: Appointment[],
@@ -18,4 +19,5 @@ export interface IMeetingState{
     showAreUSureDialog?: boolean,
     showAppointmentModal?:boolean,
     showUserModal?:boolean,
+    appointmentIsUpdating?:boolean,
 }
