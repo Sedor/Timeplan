@@ -69,6 +69,7 @@ export class MainPage extends React.Component < any, IMainPageState > {
       },{
         key: 'column2',
         name: 'Beschreibung',
+        isMultiline: true,
         fieldName: 'description',
         minWidth: 210,
         maxWidth: 350,

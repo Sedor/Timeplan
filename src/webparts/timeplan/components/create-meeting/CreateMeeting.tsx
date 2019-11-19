@@ -163,6 +163,19 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         }
     }
 
+    private _copyAppointment  = (): void => {
+        let copiedAppointment = new Appointment({
+            appointmentDate: new Date(this.state.selectedAppointment.appointmentDate.getTime()),
+            appointmentEnd: this.state.selectedAppointment.appointmentEnd,
+            appointmentStart: this.state.selectedAppointment.appointmentStart,
+            personCount: this.state.selectedAppointment.personCount,
+        });
+        copiedAppointment.appointmentDate.setDate(copiedAppointment.appointmentDate.getDate() + 1);
+        this.setState({
+            appointmentList: this.state.appointmentList.concat([copiedAppointment]),
+        });
+    }
+
     public deleteAppointment():void {
         console.log('deleteAppointment()');
         console.log(this.state);
@@ -284,7 +297,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     
     private _addUser(userList:User[]){
         console.log('_addUser');
-        console.log(userList);
         //TODO check if Unique
         this._closeUserModal();
         let newUserlist = this.state.invitedUserList.concat(userList);
@@ -294,6 +306,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _generateDistributionDropdownOptions():IDropdownOption[] {
+        console.log('_generateDistributionDropdownOptions()');
         let dropdownOptions:IDropdownOption[];
         dropdownOptions = [];
         for (let item in DistributionNames){
@@ -304,17 +317,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 });
             }
         }
-        console.log(dropdownOptions);
         return dropdownOptions;
     }
-
-    // 0: {key: "FIFO", text: "First in First out"}
-    // 1: {key: "First in First out", text: "FIFO"}
-    // 2: {key: "FAIRDISTRO", text: "Fair Distribution"}
-    // 3: {key: "Fair Distribution", text: "FAIRDISTRO"}
-    // 4: {key: "MANUEL", text: "Manual Distribution"}
-    // 5: {key: "Manual Distribution", text: "MANUEL"}
-
 
     private _setAppointmentColumnNames():IColumn[] {
         let columns:IColumn[] = [{
@@ -339,14 +343,14 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
           key: 'column3',
           name: 'Von',
           fieldName: 'appointmentStart',
-          minWidth: 100,
-          maxWidth: 350,
+          minWidth: 50,
+          maxWidth: 100,
         } as IColumn,{
           key: 'column4',
           name: 'Bis',
           fieldName: 'appointmentEnd',
-          minWidth: 100,
-          maxWidth: 350,
+          minWidth: 50,
+          maxWidth: 100,
         } as IColumn,{
           key: 'column5',
           name: 'Personen',
@@ -354,8 +358,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
           onRender: (item: Appointment) => {
             return <span>{item.personCount}</span>;
           },
-          minWidth: 100,
-          maxWidth: 350,
+          minWidth: 50,
+          maxWidth: 100,
         } as IColumn,]
         return columns;
       }
@@ -411,6 +415,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 <div>
                     <DefaultButton text='Neuer Termin' onClick={this.createNewAppointment} />
                     <DefaultButton text='Bearbeiten' onClick={this.modifyAppointment} />
+                    <DefaultButton text='Termin kopieren' onClick={this._copyAppointment} />
                     <DefaultButton text='Loeschen' onClick={this.deleteAppointment} />
                 </div>
                 <div>
