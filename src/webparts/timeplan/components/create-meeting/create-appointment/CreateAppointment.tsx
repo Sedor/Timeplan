@@ -11,21 +11,10 @@ import { DatePicker, DayOfWeek, IDatePickerStrings } from 'office-ui-fabric-reac
 
 const DayPickerStrings: IDatePickerStrings = {
     months: ['Januar', 'Februar', 'Maerz', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-  
     shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
-  
     days: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag','Sonntag'],
-  
     shortDays: [ 'M', 'D', 'M', 'D', 'F', 'S', 'S'],
-  
     goToToday: 'Heute',
-    prevMonthAriaLabel: 'Go to previous month',
-    nextMonthAriaLabel: 'Go to next month',
-    prevYearAriaLabel: 'Go to previous year',
-    nextYearAriaLabel: 'Go to next year',
-    //closeButtonAriaLabel: 'Close date picker',
-    isRequiredErrorMessage: 'Start date is required.',
-  
     invalidInputErrorMessage: 'Falsches Datumsformat.'
   };
 
@@ -38,25 +27,18 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
             meetingDate: null,
             persons: 1
         };
-        
-        this._onParseDateFromString = this._onParseDateFromString.bind(this);
-        this._onFromInputChange = this._onFromInputChange.bind(this);
-        this._onUntilInputChange = this._onUntilInputChange.bind(this);
-        this._onPersonInputChange = this._onPersonInputChange.bind(this);
-        this._saveAppointmentToList = this._saveAppointmentToList.bind(this);
-        this._onSelectDate = this._onSelectDate.bind(this);
     }
 
-    private _onSelectDate(date: Date | null | undefined){
+    private _onSelectDate = (date: Date | null | undefined) => {
         this.setState({ meetingDate: date });
     };
 
-    private _onFormatDate(date: Date):string {
+    private _onFormatDate = (date: Date):string => {
         console.log('in _onFormatDate');
         return date.getDate() + '.' + (date.getMonth() + 1) + '.' + (date.getFullYear()); // TT.MM.JJJJ
     };
 
-    private _onParseDateFromString(value: string):Date {
+    private _onParseDateFromString = (value: string):Date => {
         console.log('in _onParseDateFromString');
         const date = this.state.meetingDate || new Date();
         const values = (value || '').trim().split('.');
@@ -69,7 +51,7 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
         return new Date(year, month, day);
     };
 
-    componentDidMount(){
+    componentDidMount = () => {
         console.log('CreateAppointment.componentDidMount()');
         if(this.props.isUpdate){
             this.setState({
@@ -82,25 +64,25 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
     }
 
 
-    private _onFromInputChange(from:string){
+    private _onFromInputChange = (from:string) => {
         this.setState({
             from: from,
         })
     }
 
-    private _onUntilInputChange(until:string){
+    private _onUntilInputChange = (until:string) => {
         this.setState({
             until: until,
         })
     }
 
-    private _onPersonInputChange(person:string){
+    private _onPersonInputChange = (person:string) => {
         this.setState({
             persons: parseInt(person),
         })
     }
 
-    private _saveAppointmentToList(){
+    private _saveAppointmentToList = () => {
         console.log('CreateAppointment._saveAppointmentToList()');
         //TODO input verification
         let newAppointment= new Appointment({
@@ -119,7 +101,7 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
         this.props.closeCreateAppointmentModal();
     }
 
-    private _onNotifyValidationResult(errorMessage: string, value: string){
+    private _onNotifyValidationResult = (errorMessage: string, value: string) => {
         console.log('_onNotifyValidationResult for Person');
         console.log(errorMessage);
         console.log(value);
@@ -163,7 +145,7 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
                         </div>
                     <div>
                         <DefaultButton text='Zurueck' onClick={this.props.closeCreateAppointmentModal}/>
-                        <DefaultButton text='Hinzufuegen' onClick={this._saveAppointmentToList}/>
+                        <DefaultButton text={this.props.isUpdate ? 'Speichern' : 'Hinzufuegen' } onClick={this._saveAppointmentToList} />
                     </div>
                 </div>
             </div>

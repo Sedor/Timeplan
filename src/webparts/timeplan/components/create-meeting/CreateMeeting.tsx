@@ -42,7 +42,9 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 title: ''
             }),
             appointmentList: [],
+            appointmentDeletionList: [],
             invitedUserList: [],
+            invitedUserDeletionList: [],
             clearance: false,
             appointmentIsUpdating: false,
         };
@@ -55,7 +57,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         this._saveMeeting = this._saveMeeting.bind(this);
         this._saveNewMeeting = this._saveNewMeeting.bind(this);
         this._addUser = this._addUser.bind(this);
-        this.deleteAppointment = this.deleteAppointment.bind(this); // TODO maybe also delete this
         this.modifyAppointment = this.modifyAppointment.bind(this); // TODO remove
         this._onDropdownChange = this._onDropdownChange.bind(this);
         this._addAppointment = this._addAppointment.bind(this);
@@ -160,28 +161,55 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         });
     }
 
-    public deleteAppointment():void {
-        console.log('deleteAppointment()');
-        console.log(this.state);
-        
+    private _deleteAppointment = ():void => {
+        console.log('CreateMeeting.deleteAppointment()');
+        if(this.state.selectedAppointment === undefined || this.state.selectedAppointment === null){
+            alert('You didnt select an Appointment'); // TODO remove
+        }else{
+            let toRemoveAppointment = this.state.selectedAppointment;
+            this.state.appointmentList = this.state.appointmentList.filter(obj => obj !== toRemoveAppointment);
+            if(this.state.selectedAppointment.sharepointPrimaryId){
+                this.setState({
+                    appointmentDeletionList : this.state.appointmentDeletionList.concat([toRemoveAppointment]),
+                });
+            }
+            this.setState({
+                appointmentList: this.state.appointmentList,
+                selectedAppointment: undefined,
+            });
+        }
+        console.log(this._appointmentSelection.getSelection());
     }
 
-    public inviteUser():void {
+    public inviteUser = ():void => {
         console.log('inviteUser()');
         this.setState({
             showUserModal:true,
         })
     }
 
-    public deleteInvitedUser():void {
-        alert('clicked deleteInvitedUser');
+    public deleteInvitedUser = ():void => {
+        console.log('CreateMeeting.deleteInvitedUser()');
+        if(this.state.selectedUser === undefined || this.state.selectedUser === null){
+            alert('You didnt select an User'); // TODO remove
+        }else{
+            let toRemoveUser = this.state.selectedUser;
+            this.state.invitedUserList = this.state.invitedUserList.filter(obj => obj !== toRemoveUser);
+            if(this.state.selectedUser.id){
+                this.setState({
+                    invitedUserDeletionList : this.state.invitedUserDeletionList.concat([toRemoveUser]),
+                });
+            }
+            this.setState({
+                invitedUserList: this.state.invitedUserList,
+                selectedUser: undefined,
+            });
+        }
     }
 
     private _saveMeeting():void{
         console.log('Saving Meeting');
-        // First check if meeting is an update or new one
         if(this.state.isUpdate){
-            // its an update hooray
             this._saveUpdatedMeeting();
         } else {
             this._saveNewMeeting();
@@ -189,25 +217,34 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         this.props.history.replace('/',{});
     }
 
-    private _saveNewMeeting(){
-        console.log('_saveNewMeeting');
-        console.log(this.state.meeting);
+    private _saveNewMeeting = () => {
+        console.log('CreateMeeting._saveNewMeeting()');
         try {
             MeetingService.saveMeeting(this.state.meeting).then((meetingId:string)=> {
-                console.log('_saveNewMeeting() inner loop');
-                console.log(meetingId);
                 AppointmentService.saveAppointments(meetingId, this.state.appointmentList);
                 UserService.saveInvitedUsers(meetingId, this.state.invitedUserList);
             });
         } catch (error) {
-            
+            console.log('boooom');
+            console.log(error);
+            alert('saving new Meeting went wrong');
         }
-        
     }
 
-    private _saveUpdatedMeeting(){
-        // TODO check with shadow list
-        console.log('_saveUpdatedMeeting');
+    private _saveUpdatedMeeting = () => {
+        console.log('CreateMeeting._saveUpdatedMeeting()');
+        try {
+            MeetingService.updateMeeting(this.state.meeting).then(()=> {
+                AppointmentService.batchDeleteAppointments(this.state.appointmentDeletionList);
+                UserService.batchDeleteInvitedUser(this.state.invitedUserDeletionList);
+                // TODO save updated Appointments
+                // TODO save new Appointments and Users
+            });
+        } catch (error) {
+            console.log('boooom');
+            console.log(error);
+            alert('saving new Meeting went wrong');
+        }
     }
 
     private _onReleaseChange(checked: boolean):void {
@@ -411,7 +448,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     <DefaultButton text='Neuer Termin' onClick={this.createNewAppointment} />
                     <DefaultButton text='Bearbeiten' onClick={this.modifyAppointment} />
                     <DefaultButton text='Termin kopieren' onClick={this._copyAppointment} />
-                    <DefaultButton text='Loeschen' onClick={this.deleteAppointment} />
+                    <DefaultButton text='Loeschen' onClick={this._deleteAppointment} />
                 </div>
                 <div>
                     <DetailsList

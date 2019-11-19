@@ -67,9 +67,18 @@ export class UserService {
         }
     }
 
-    public static async batchDeleteAllInvitedUserForMeetingID(meetingId:string) {
+    public static async batchDeleteInvitedUser(userList:User[]) {
+        console.log('Service.batchDeleteInvitedUser()');
         let batch = sp.web.createBatch();
+        userList.forEach( user => {
+            sp.web.lists.getByTitle(this.invitationListName).items.getItemByStringId(user.id).inBatch(batch).delete();
+        });
+        batch.execute();
+    }
+
+    public static async batchDeleteAllInvitedUserForMeetingID(meetingId:string) {
         console.log('Service.deleteAllInvitedUserForMeetingID()');
+        let batch = sp.web.createBatch();
         return await this.getInvitedUserListForMeetingId(meetingId).then((userList:User[]) => {
             userList.forEach( user => {
                 sp.web.lists.getByTitle(this.invitationListName).items.getItemByStringId(user.id).inBatch(batch).delete();
@@ -77,11 +86,6 @@ export class UserService {
             batch.execute();
         })
     } 
-
-
-    // sp.web.lists.getByTitle(this.meetingListName).items.getById(meetingId).delete().then(_ => {
-    //     console.log('List Item Deleted')
-    // });    
 
 }
 

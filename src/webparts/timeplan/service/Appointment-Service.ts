@@ -62,9 +62,18 @@ export class AppointmentService {
         });
     }
 
-    public static async batchDeleteAppointmentsByMeetingId(meetingId:string) {
+    public static async batchDeleteAppointments(appointmentList:Appointment[]) {
+        console.log('Service.batchDeleteAppointments()');
         let batch = sp.web.createBatch();
+        appointmentList.forEach( appointment  => {
+            sp.web.lists.getByTitle(this.appointmentListName).items.getItemByStringId(appointment.sharepointPrimaryId).inBatch(batch).delete();
+        });
+        batch.execute();
+    }
+
+    public static async batchDeleteAppointmentsByMeetingId(meetingId:string) {
         console.log('Service.deleteAppointmentByMeetingId()');
+        let batch = sp.web.createBatch();
         return await this.getAppointmentListForMeetingId(meetingId).then((appointmentList:Appointment[]) => {
             appointmentList.forEach( appointment  => {
                 sp.web.lists.getByTitle(this.appointmentListName).items.getItemByStringId(appointment.sharepointPrimaryId).inBatch(batch).delete();
@@ -72,37 +81,6 @@ export class AppointmentService {
             batch.execute();
         })
     }
-
-    // public static async getMeetingList():Promise<Meeting[]> { //DONE
-    //     return await sp.web.lists.getByTitle(this.meetingListName).items.get().then((itemsArray: any[]) => {
-    //         return itemsArray.map(element => {
-    //             return new Meeting(element.Id, element.Title, element.akag);
-    //         })
-    //     });
-    // }
-
-
-
-    // public static async getMeetingById(id:string):Promise<Appointment> { 
-    //     let item = await sp.web.lists.getByTitle(this.meetingListName).items.getItemByStringId(id).get().then(
-    //         result => {
-    //             return new Appointment(result.Id, result.Title,result.akag);
-    //         });
-    //     return item;
-    // }
-
-    // public static async updateMeetingById(meeting:Appointment):Promise<boolean> {
-    //     return await sp.web.lists.getByTitle(this.meetingListName).items.getItemByStringId(meeting.getId()).update({
-    //         Title: meeting.getTitle(),
-    //         akag: meeting.getDescription(),
-    //     }).then( () => {
-    //         return true;
-    //     }).catch( () => {
-    //         return false;
-    //     })
-    // }
-
-
-
+    
 }
 

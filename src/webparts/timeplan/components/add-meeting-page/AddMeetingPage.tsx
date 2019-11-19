@@ -33,29 +33,6 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
         
     }
 
-    public getMeetingWithId():void {
-        console.log('requesting meeting with ID 3:');
-        let meeting:Meeting;
-        MeetingService.getMeetingById('3').then(item => {
-            meeting = item
-            console.log('got meeting:');
-            console.log(meeting);
-        });
-        
-    }
-
-    public UpdateMeetingWithId1():void {
-        console.log('Update Meeting with ID 1:');
-        let meeting:Meeting;
-        MeetingService.getMeetingById('1').then(meetingItem => {
-            meeting= meetingItem
-            console.log('Meeting got Updated with:')
-            console.log(meeting)
-        });
-        meeting.title = 'A Brand new Title' 
-        MeetingService.updateMeetingById(meeting);
-    }
-
     public addNewMeeting():void {
         // let newMeeting = new Meeting('8','NewMeeting','A new Meeting that got saved');
         // console.log('Adding a new Meeting');
@@ -110,12 +87,6 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
             <h1>Testing fields</h1>
             <div>
                 <button onClick={this.getMeetingList}>Get Meeting List</button>
-            </div>
-            <div>
-                <button onClick={this.getMeetingWithId}>Get Meeting with ID 3</button>
-            </div>
-            <div>
-                <button onClick={this.UpdateMeetingWithId1}>Update Meeting ID with ID 1</button>
             </div>
             <div>
                 <button onClick={this.addNewMeeting}>Add new Meeting</button>
