@@ -14,7 +14,7 @@ export class MeetingService {
         return await sp.web.lists.getByTitle(this.meetingListName).items.get().then((itemsArray: any[]) => {
             return itemsArray.map(element => {
                 return new Meeting({
-                    id:element.Id,
+                    sharepointPrimaryId:element.Id,
                     title:element.Title,
                     description:element.akag,
                     status: element.status,
@@ -39,13 +39,18 @@ export class MeetingService {
 
     public static async updateMeeting(meeting:Meeting) {
         console.log('Service.updateMeeting()');
-        return await sp.web.lists.getByTitle(this.meetingListName).items.getItemByStringId(meeting.getId()).update({
-            Id: meeting.getId(),
-            Title: meeting.getTitle(),
-            akag: meeting.getDescription(),
-            status: meeting.status,
-            distribution: meeting.distribution,
-        });
+        try {
+            return await sp.web.lists.getByTitle(this.meetingListName).items.getItemByStringId(meeting.getSharepointPrimaryId()).update({
+                // Title: String(meeting.getTitle()),
+                // akag: String(meeting.getDescription()),
+                // status: meeting.status,
+                // distribution: meeting.distribution,
+            });    
+        } catch (error) {
+            console.log(meeting);
+            console.log(error);
+        }
+        
     }
 
 

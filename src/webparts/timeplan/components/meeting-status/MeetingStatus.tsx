@@ -31,23 +31,19 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
     }
 
     componentDidMount(){
-        window.addEventListener("beforeunload", this._handleWindowBeforeUnload);
-        console.log('in ComponentDidMount');
-        if(this.props.location.state !== undefined){
-            console.log('this.prop.location.state is defined');
-            if(this.props.location.state.selectedMeeting !== undefined){
-                console.log('this.prop.location.state.selectedMeeting is defined');
-
-                let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
-                AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.id).then(appointmentList =>{
-                    this.setState({
-                        meeting: meetingToUpgrade,
-                        appointmentList: appointmentList,
-                    })
-                });
-                console.log('ended ComponentDidMount');
-            }
-        }
+      console.log('MeetingStatus.componentDidMount()');  
+      window.addEventListener("beforeunload", this._handleWindowBeforeUnload);
+      if(this.props.location.state !== undefined){
+          if(this.props.location.state.selectedMeeting !== undefined){
+              let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
+              AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.getSharepointPrimaryId()).then(appointmentList =>{
+                  this.setState({
+                      meeting: meetingToUpgrade,
+                      appointmentList: appointmentList,
+                  })
+              });
+          }
+      }
     }
 
     private _handleWindowBeforeUnload(ev: BeforeUnloadEvent):void{
@@ -64,8 +60,8 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         key: 'column1',
         name: 'Datum',
         fieldName: null,
-        minWidth: 50,
-        maxWidth: 100,
+        minWidth: 40,
+        maxWidth: 60,
         onRender: (item: Appointment) => {
           return <span>{item.getDateAsDIN5008Format()}</span>;
         }
@@ -73,8 +69,8 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         key: 'column2',
         name: 'Tag',
         fieldName: null,
-        minWidth: 50,
-        maxWidth: 100,
+        minWidth: 40,
+        maxWidth: 50,
         onRender: (item: Appointment) => {
           return <span>{item.getDayName()}</span>;
         }
@@ -82,14 +78,14 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         key: 'column3',
         name: 'Von',
         fieldName: 'appointmentStart',
-        minWidth: 100,
-        maxWidth: 350,
+        minWidth: 40,
+        maxWidth: 50,
       } as IColumn,{
         key: 'column4',
         name: 'Bis',
         fieldName: 'appointmentEnd',
-        minWidth: 100,
-        maxWidth: 350,
+        minWidth: 40,
+        maxWidth: 50,
       } as IColumn,{
         key: 'column5',
         name: 'Personen',
@@ -97,9 +93,18 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         onRender: (item: Appointment) => {
           return <span>{item.personCount}</span>;
         },
-        minWidth: 100,
-        maxWidth: 350,
-      } as IColumn,]
+        minWidth: 40,
+        maxWidth: 50,
+      } as IColumn,{
+        key: 'column6',
+        name: 'Zugeteilt',
+        fieldName: null,
+        onRender: (item: Appointment) => {
+          return <span>{'User A'}</span>;
+        },
+        minWidth: 40,
+        maxWidth: 50,
+      }]
       return columns;
     }
 

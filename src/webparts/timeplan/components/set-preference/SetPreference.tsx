@@ -35,7 +35,7 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
                 console.log('this.prop.location.state.selectedMeeting is defined');
 
                 let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
-                AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.id).then(appointmentList =>{
+                AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.getSharepointPrimaryId()).then(appointmentList =>{
                     this.setState({
                         meeting: meetingToUpgrade,
                         appointmentList: appointmentList,

@@ -11,7 +11,7 @@ export class AppointmentService {
     }
 
     public static convertSPDateToTypescriptDate(spDate:string):Date{
-        spDate = spDate.split('T')[0]; // getting 
+        spDate = spDate.split('T')[0];
         const values = (spDate || '').trim().split('-');
         const year = values.length > 0 ? parseInt(values[0], 10) : 0;
         const month = values.length > 1 ? Math.max(1, Math.min(12, parseInt(values[1], 10))) - 1 : 0;

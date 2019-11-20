@@ -51,24 +51,9 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         this._generatedDropdownOptions = this._generateDistributionDropdownOptions();
         this._initializeAppointmentSelection();
         this._initializeUserSelection();
-        
-
-        this._onMeetingDescriptionChange = this._onMeetingDescriptionChange.bind(this);
-        this._saveMeeting = this._saveMeeting.bind(this);
-        this._saveNewMeeting = this._saveNewMeeting.bind(this);
-        this._addUser = this._addUser.bind(this);
-        this.modifyAppointment = this.modifyAppointment.bind(this); // TODO remove
-        this._onDropdownChange = this._onDropdownChange.bind(this);
-        this._addAppointment = this._addAppointment.bind(this);
-        this._onMeetingNameChange = this._onMeetingNameChange.bind(this);
-        this._onReleaseChange = this._onReleaseChange.bind(this);
-        this._initializeAppointmentSelection = this._initializeAppointmentSelection.bind(this);
-        this._initializeUserSelection = this._initializeUserSelection.bind(this);
-        this.createNewAppointment = this.createNewAppointment.bind(this);
-        this.inviteUser = this.inviteUser.bind(this);
     }
 
-    private _initializeAppointmentSelection():void {
+    private _initializeAppointmentSelection = ():void => {
         this._appointmentSelection = new Selection({
           onSelectionChanged: () => {
             console.log('onAppointmentSelectionChanged()');
@@ -81,7 +66,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         });
     }
 
-    private _initializeUserSelection():void {
+    private _initializeUserSelection = ():void => {
         this._userSelection = new Selection({
           onSelectionChanged: () => {
              console.log('onUserSelectionChanged()');
@@ -94,7 +79,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         });
     }
 
-    componentDidMount(){
+    componentDidMount = () => {
         window.addEventListener("beforeunload", this._handleWindowBeforeUnload);
         console.log('componentDidMount()');
         if(this.props.location.state !== undefined){
@@ -105,12 +90,12 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     isUpdate: true,
                     clearance: (meetingToUpgrade.status === MeetingStatus.OPEN),
                 });
-                AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.id).then((appointmentList:Appointment[]) =>{
+                AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.getSharepointPrimaryId()).then((appointmentList:Appointment[]) =>{
                     this.setState({
                         appointmentList: appointmentList,
                     });
                 });
-                UserService.getInvitedUserListForMeetingId(meetingToUpgrade.id).then((userList:User[])=>{
+                UserService.getInvitedUserListForMeetingId(meetingToUpgrade.getSharepointPrimaryId()).then((userList:User[])=>{
                     this.setState({
                         invitedUserList: userList,
                     });
@@ -119,17 +104,17 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         }
     }
 
-    componentWillUnmount() {
+    componentWillUnmount = () => {
         console.log('componentWillUnmount');
         window.removeEventListener("beforeunload", this._handleWindowBeforeUnload);
     }
 
-    private _handleWindowBeforeUnload(ev: BeforeUnloadEvent):void{
+    private _handleWindowBeforeUnload = (ev: BeforeUnloadEvent):void => {
         console.log('_handleWindowBeforeUnload');
         ev.returnValue = 'Aenderungen sind noch nicht gespeichert. Wirklich die Seite verlassen?';
     }
 
-    public createNewAppointment():void {
+    public createNewAppointment = ():void => {
         console.log('clicked CreateNewAppointment');
         this.setState({
             showAppointmentModal: true,
@@ -207,7 +192,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         }
     }
 
-    private _saveMeeting():void{
+    private _saveMeeting = ():void => {
         console.log('Saving Meeting');
         if(this.state.isUpdate){
             this._saveUpdatedMeeting();
@@ -247,28 +232,28 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         }
     }
 
-    private _onReleaseChange(checked: boolean):void {
+    private _onReleaseChange = (checked: boolean):void => {
         console.log('_onReleaseChange:');
         this.setState({
             clearance: checked
         });
     }
 
-    private _onMeetingNameChange(meetingName:string){
+    private _onMeetingNameChange = (meetingName:string) => {
         this.state.meeting.setTitle(meetingName);  // TODO Change this
         this.setState({  
             meeting: this.state.meeting
         });
     }
 
-    private _onMeetingDescriptionChange(meetingDescription: string){
+    private _onMeetingDescriptionChange = (meetingDescription: string) => {
         this.state.meeting.setDescription(meetingDescription);  // TODO Change this
         this.setState({  
             meeting: this.state.meeting
         });
     }
 
-    private _onDropdownChange(item: IDropdownOption): void {
+    private _onDropdownChange = (item: IDropdownOption): void => {
         console.log('_onDropdownChange()'); //TODO remove
         console.log(item.key);
         this.state.meeting.distribution = DistributionNames[item.key];
@@ -290,7 +275,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         this.setState({ showAreUSureDialog: false});
     }
 
-    private _addAppointment(appointment:Appointment): void{
+    private _addAppointment = (appointment:Appointment): void => {
         console.log('CreateMeeting._addAppointment()');
         let newAppointmentList = this.state.appointmentList.concat([appointment]);
         this.setState({
@@ -322,11 +307,11 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         this.setState({
             showAreUSureDialog: false,
         });
-        MeetingService.deleteMeetingById(this.state.meeting.id);
+        MeetingService.deleteMeetingById(this.state.meeting.getSharepointPrimaryId());
         this.props.history.replace('/',{});
     }
     
-    private _addUser(userList:User[]){
+    private _addUser = (userList:User[]) => {
         console.log('_addUser');
         //TODO check if Unique
         this._closeUserModal();
@@ -336,7 +321,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         });
     }
 
-    private _generateDistributionDropdownOptions():IDropdownOption[] {
+    private _generateDistributionDropdownOptions = ():IDropdownOption[] => {
         console.log('_generateDistributionDropdownOptions()');
         let dropdownOptions:IDropdownOption[];
         dropdownOptions = [];
@@ -351,7 +336,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         return dropdownOptions;
     }
 
-    private _setAppointmentColumnNames():IColumn[] {
+    private _setAppointmentColumnNames = ():IColumn[] => {
         let columns:IColumn[] = [{
           key: 'column1',
           name: 'Datum',
@@ -395,7 +380,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         return columns;
       }
 
-      private _setUserColumnNames():IColumn[] {
+      private _setUserColumnNames = ():IColumn[] => {
         let columns:IColumn[] = [{
           key: 'column1',
           name: 'Eingeladener Benutzer',

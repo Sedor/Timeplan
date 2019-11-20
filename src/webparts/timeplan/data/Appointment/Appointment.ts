@@ -1,3 +1,4 @@
+import { Participant } from '../User/Participant'
 
 export interface IAppointment{    
     appointmentDate?: Date,
@@ -5,15 +6,18 @@ export interface IAppointment{
     appointmentEnd?: string,
     personCount?: number,
     sharepointPrimaryId?: string,
+    participants?: Participant[],
 }
 
 export class Appointment {
+
+    sharepointPrimaryId?: string;
 
     appointmentDate: Date;
     appointmentStart: string;
     appointmentEnd: string;
     personCount: number;
-    sharepointPrimaryId?: string;
+    participants?: Participant[];
 
     private _WeekdaysGerman = [
         'Sonntag',
