@@ -7,5 +7,6 @@ export interface IMeetingStatusState{
     meeting?: Meeting,
     appointmentList?: Appointment[],
     participantsList?: User[], //TODO Change to Participant
-    appointmentColumns?:IColumn[]
+    appointmentColumns?:IColumn[],
+    userColumns?:IColumn[],
 }

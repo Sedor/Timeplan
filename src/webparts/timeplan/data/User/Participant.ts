@@ -3,7 +3,7 @@ import { User, IUser } from './User';
 
 export interface IParticipant extends IUser{    
     participantId: string;
-    appointmentPriority: Map<string, number>[],
+    appointmentPriority: Map<string, number>,
 }
 
 

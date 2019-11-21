@@ -13,25 +13,20 @@ export class CreateUser extends React.Component < any, ICreateUserState > {
 
     constructor(props: any){
         super(props); 
-      
-        this._onUserEmailChange = this._onUserEmailChange.bind(this);
-        this._createUserAndAdd = this._createUserAndAdd.bind(this);
-        this._onFilterChanged = this._onFilterChanged.bind(this);
     }
 
-    private _createUserAndAdd() {
+    private _createUserAndAdd = () => {
       this.props.addUserToList(this._selectedUserlist);
     }
 
-    private _onUserEmailChange(email:string){
+    private _onUserEmailChange = (email:string) => {
         console.log('onUserChange');
         this.setState({
             email: email
         })
     }
 
-    private _onFilterChanged(filterText: string, tagList: ITag[]): ITag[] | Promise<ITag[]>{
-      
+    private _onFilterChanged = (filterText: string, tagList: ITag[]): ITag[] | Promise<ITag[]> => {
       this._selectedUserlist = tagList.map( (tag:ITag) =>{
         return new User({name:tag.key, eMail: tag.name});
       });
@@ -47,7 +42,7 @@ export class CreateUser extends React.Component < any, ICreateUserState > {
       }
     }
 
-    private _getTextFromItem(item: ITag): string {
+    private _getTextFromItem = (item: ITag): string => {
       return item.name;
     }
 
