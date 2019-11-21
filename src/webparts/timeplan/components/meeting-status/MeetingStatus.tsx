@@ -25,8 +25,8 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
     constructor(props: any){
         super(props);
 
-        this._participantSelection = new Selection();
-        this._appointmentSelection = new Selection();
+        this._participantSelection = new Selection(); // TODO check if notwendig
+        this._appointmentSelection = new Selection(); // TODO check if notwendig
         this._dragDropEvents = this._getDragDropEvents();
         this._draggedIndex = -1;
 
@@ -49,9 +49,11 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         },
         canDrag: (item?: any) => {
           console.log('canDrag()');
-          console.log((item instanceof Participant));
-          console.log('----------------------');
-          return (item instanceof Participant);
+          if (item instanceof Appointment){
+            return item.participants !== undefined && item.participants !== null; 
+          }else {
+            return true;  
+          }
         },
         onDragEnter: (item?: any, event?: DragEvent) => {
           // return string is the css classes that will be added to the entering element.
@@ -60,10 +62,17 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         },
         onDragLeave: (item?: any, event?: DragEvent) => {
           console.log('onDragLeave()');
+          console.log(item);
+          console.log(event);
+          console.log('kkkkkkkkkkkkkkkkkkkkkkkkkk')
           return;
         },
         onDrop: (item?: any, event?: DragEvent) => {
           console.log('onDrop()');
+          console.log('item:');
+          console.log(item);
+          console.log('draggedItem');
+          console.log(this._draggedItem)
           if (this._draggedItem) {
             this._insertBeforeItem(item);
           }
@@ -72,16 +81,25 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
           console.log('onDragStart()');
           this._draggedItem = item;
           this._draggedIndex = itemIndex!;
+          console.log(event);
+          console.log('wwwwwwwwwwwwwwwwwwwww')
         },
         onDragEnd: (item?: any, event?: DragEvent) => {
           console.log('onDragEnd()');
+          // everything was handled
           this._draggedItem = undefined;
           this._draggedIndex = -1;
         }
       };
     }
 
-    private _insertBeforeItem(item: Participant): void {
+    private _insertBeforeItem = (item: Participant): void => {
+      console.log('rrrrrrrrrrrrrrrrrrrrrrrrr');
+      console.log(item);
+      console.log(this._draggedItem);
+
+
+      console.log('rrrrrrrrrrrrrrrrrrrrrrrrr');
       const draggedItems = this._participantSelection.isIndexSelected(this._draggedIndex)
         ? (this._participantSelection.getSelection() as Participant[])
         : [this._draggedItem!];
@@ -132,6 +150,11 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
           }
       }
     }
+
+  componentWillUnmount = () => {
+      console.log('componentWillUnmount');
+      window.removeEventListener("beforeunload", this._handleWindowBeforeUnload);
+  }
 
     private _handleWindowBeforeUnload(ev: BeforeUnloadEvent):void{
         console.log('_handleWindowBeforeUnload');
@@ -226,7 +249,6 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
               <DetailsList
                 items={this.state.appointmentList}
                 columns={this.state.appointmentColumns}
-                // selectionPreservedOnEmptyClick={true}
                 selection={this._appointmentSelection}
                 dragDropEvents={this._dragDropEvents}
                 checkboxVisibility={CheckboxVisibility.hidden}
