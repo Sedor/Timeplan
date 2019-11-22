@@ -51,7 +51,7 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
         return new Date(year, month, day);
     };
 
-    componentDidMount = () => {
+    componentDidMount(){
         console.log('CreateAppointment.componentDidMount()');
         if(this.props.isUpdate){
             this.setState({
@@ -93,7 +93,7 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
         });
         if(this.props.isUpdate){
             console.log('updating');
-            this.props.updateAppointment(this.props.appointmentToEdit,newAppointment);
+            this.props.updateAppointment(this.props.appointmentToEdit,newAppointment); 
         }else{
             console.log('just adding');
             this.props.addAppointmentToList(newAppointment);

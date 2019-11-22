@@ -151,7 +151,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       }
     }
 
-  componentWillUnmount = () => {
+  componentWillUnmount(){
       console.log('componentWillUnmount');
       window.removeEventListener("beforeunload", this._handleWindowBeforeUnload);
   }
@@ -242,7 +242,6 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
 
     public render(): React.ReactElement<IMeetingStatusProps> {
         return(
-
         <div className={styles.MeetingStatus} >
             <h1>{this.state.meeting.title}</h1>
             <div>
@@ -267,7 +266,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
                 <Link to='/'>
                     <DefaultButton text='Zurueck' /> 
                 </Link>
-                <DefaultButton text='Speichern' onClick={this._saveDistribution} />
+                <DefaultButton text='Speichern' onMenuClick={this._saveDistribution}/>
             </div>
         </div >
         );

@@ -24,19 +24,19 @@
     "@pnp/pnpjs": "^1.3.5",
     "@pnp/sp": "^1.3.6",
     "@types/es6-promise": "0.0.33",
-    "@types/react": "0.14.46",
+    "@types/react": "16.0.36",
     "@types/react-addons-shallow-compare": "0.14.17",
-    "@types/react-addons-test-utils": "0.14.15",
-    "@types/react-addons-update": "0.14.14",
-    "@types/react-dom": "0.14.18",
+    "@types/react-addons-test-utils": "0.14.18",
+    "@types/react-addons-update": "0.14.18",
+    "@types/react-dom": "16.0.3",
     "@types/webpack-env": "1.13.1",
-    "office-ui-fabric-react": "2.34.2",
+    "office-ui-fabric-react": "5.135.3",
     "react": "15.4.2",
     "react-dom": "15.4.2",
     "react-router-dom": "^5.1.2"
   },
   "resolutions": {
-    "@types/react": "0.14.46"
+    "@types/react": "15.0.29"
   },
   "devDependencies": {
     "@microsoft/sp-build-web": "~1.1.0",
