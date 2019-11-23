@@ -34,20 +34,20 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         console.log('CreateMeeting.Constructor()');
         console.log('state is:');
         console.log(this.state);
-        // this.setState({
-        //     userColumns: this._setUserColumnNames(),
-        //     appointmentColumns: this._setAppointmentColumnNames(),
-        //     isUpdate: false,
-        //     meeting: new Meeting({
-        //         title: ''
-        //     }),
-        //     appointmentList: [],
-        //     appointmentDeletionList: [],
-        //     invitedUserList: [],
-        //     invitedUserDeletionList: [],
-        //     clearance: false,
-        //     appointmentIsUpdating: false,
-        // });
+        this.state = {
+            userColumns: this._setUserColumnNames(),
+            appointmentColumns: this._setAppointmentColumnNames(),
+            isUpdate: false,
+            meeting: new Meeting({
+                title: ''
+            }),
+            appointmentList: [],
+            appointmentDeletionList: [],
+            invitedUserList: [],
+            invitedUserDeletionList: [],
+            clearance: false,
+            appointmentIsUpdating: false,
+        };
         this._generatedDropdownOptions = this._generateDistributionDropdownOptions();
         this._initializeAppointmentSelection();
         this._initializeUserSelection();
@@ -421,13 +421,13 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     </div>
                 </div>
                 <div>
-                     {/* <DetailsList  */}
-                    //  items={this.state.appointmentList}
-                    //  columns={this.state.appointmentColumns}
-                    //  selection={this._appointmentSelection}
-                    //  checkboxVisibility={CheckboxVisibility.hidden}
-                    //  setKey='id'
-                    //  />
+                     <DetailsList
+                     items={this.state.appointmentList}
+                     columns={this.state.appointmentColumns}
+                     selection={this._appointmentSelection}
+                     checkboxVisibility={CheckboxVisibility.hidden}
+                     setKey='id'
+                     />
                 </div>
                 <div>
                     <DefaultButton text='Neuer Termin' onClick={this.createNewAppointment} />
@@ -436,12 +436,12 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     <DefaultButton text='Loeschen' onClick={this._deleteAppointment} />
                 </div>
                 <div>
-                    {/* <DetailsList
+                    <DetailsList
                     items={this.state.invitedUserList}
                     columns={this.state.userColumns}
                     selection={this._userSelection}
                     checkboxVisibility={CheckboxVisibility.hidden}
-                    /> */}
+                    />
                 </div> 
                 <div>
                     <DefaultButton text='Benutzer hinzufuegen' onClick={this.inviteUser} />

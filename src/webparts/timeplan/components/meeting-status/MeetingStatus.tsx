@@ -78,6 +78,8 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
           }
         },
         onDragStart: (item?: any, itemIndex?: number, selectedItems?: any[], event?: MouseEvent) => {
+          // TODO use this when Fabric-UI was upgraded bugFix at -> https://github.com/OfficeDev/office-ui-fabric-react/pull/5688
+          
           console.log('onDragStart()');
           this._draggedItem = item;
           this._draggedIndex = itemIndex!;
@@ -266,7 +268,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
                 <Link to='/'>
                     <DefaultButton text='Zurueck' /> 
                 </Link>
-                <DefaultButton text='Speichern' onMenuClick={this._saveDistribution}/>
+                <DefaultButton text='Speichern' onClick={this._saveDistribution}/>
             </div>
         </div >
         );
