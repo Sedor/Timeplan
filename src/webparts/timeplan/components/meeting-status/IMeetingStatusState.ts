@@ -8,5 +8,6 @@ export interface IMeetingStatusState{
     appointmentList?: Appointment[],
     participantsList?: User[], //TODO Change to Participant
     appointmentColumns?:IColumn[],
-    userColumns?:IColumn[],
+    unassignedParticipantsColumns?:IColumn[],
+    assignedParticipantsColumns?:IColumn[],
 }

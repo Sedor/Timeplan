@@ -16,27 +16,30 @@ import { IDragDropEvents, IDragDropContext } from 'office-ui-fabric-react/lib/ut
 export class MeetingStatus extends React.Component < any, IMeetingStatusState > {
 
     private _appointmentSelection: Selection;
-    private _participantSelection: Selection;
+    private _unassignedParticipantSelection: Selection;
+    private _assignedParticipantsSelection: Selection; //TODO check this up 
 
     private _dragDropEvents: IDragDropEvents;
-
-    private _dropDestination: Appointment;
-    private _draggedIndex: number;
+    private _dropDestination: Appointment | Participant;
+    // private _lastSelectedAppointment: Appointment;
 
     constructor(props: any){
         super(props);
 
-        this._participantSelection = new Selection(); // TODO check if notwendig
-        this._appointmentSelection = new Selection(); // TODO check if notwendig
+        this._unassignedParticipantSelection = new Selection();
+        this._assignedParticipantsSelection = new Selection();
+        this._appointmentSelection = new Selection(); 
+
         this._dragDropEvents = this._getDragDropEvents();
-        this._draggedIndex = -1;
+        // this._draggedIndex = -1;
 
         this.state = {
             meeting: new Meeting({title:''}),
             appointmentList: [],
             participantsList: this.generateParticipantsList(), //TODO Change to Participant
             appointmentColumns: this._setAppointmentColumnNames(),
-            userColumns: this._setUserColumnNames(),
+            unassignedParticipantsColumns: this._setUnassignedParticipantColumnNames(),
+            assignedParticipantsColumns: this._setAssignedParticipantColumnNames()
         }
     }
 
@@ -44,8 +47,11 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       return {
         canDrop: (dropContext?: IDragDropContext, dragContext?: IDragDropContext) => {
           console.log('canDrop()');
-          // console.log(dropContext); // Here is the Item itself in it. With its Index in the list
-          // console.log(dragContext); // empty (maybe here will be the dopped item in it)
+          try {
+            return !(dropContext.data as Participant).isAssigned;
+          } catch (error) {
+            console.log(error);
+          }
           return true;
         },
         canDrag: (item?: any) => {
@@ -57,7 +63,6 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
           }
         },
         onDragEnter: (item?: any, event?: DragEvent) => {
-          // return string is the css classes that will be added to the entering element.
           return styles.onDropEnter;
         },
         onDragLeave: (item?: any, event?: DragEvent) => {
@@ -66,45 +71,59 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         },
         onDrop: (onDropItem?: any, event?: DragEvent) => {
           console.log('onDrop()');
+          // console.log('DropDestination is now:');
           if(onDropItem instanceof Appointment){
+            // console.log(onDropItem);
             this._dropDestination = onDropItem;
-          }else{
-            console.log('Drop Destination is not of Type Appointment');
-            console.log(onDropItem);
+          }else if(onDropItem instanceof Participant){
+            if(!(onDropItem as Participant).isAssigned){
+              // console.log(onDropItem);
+              this._dropDestination = onDropItem;
+            }            
           }
         },
         onDragStart: (item?: any, itemIndex?: number, selectedItems?: any[], event?: MouseEvent) => {
           // TODO use this when Fabric-UI was upgraded bugFix at -> https://github.com/OfficeDev/office-ui-fabric-react/pull/5688
-          
           console.log('onDragStart()');
-          // this._draggedItem = item;
-          this._draggedIndex = itemIndex!;
-          console.log(itemIndex);
         },
         onDragEnd: (item?: any, event?: DragEvent) => {
           console.log('onDragEnd()');
-          // this._draggedIndex = -1;
-          console.log(item);
-          if (item instanceof Participant) {
-            console.log('check DropLocation');
-            console.log(this._dropDestination);
-            if(this._dropDestination.isSlotFree){
-              console.log('dropDestination got a free Slot');
-              this._dropDestination.addParticipant(item);
-              //TODO check with new render List and how to do that
-              this._removeFromParticipantList(item);
-            }
-          //TODO check if possible -> free Space
-          //TODO remove participant from list
-          //TODO add participant to Appointment
-          //TODO rerender everything
-
-
+          if ((item instanceof Participant) && (this._dropDestination instanceof Appointment)) {
+            this._dropIntoAppointment(this._dropDestination, item);
+            //TODO need to differentiate if i drop from appointment to appointment
+          } else if ((item instanceof Participant) && (this._dropDestination instanceof Participant)){
+            //
+            this._dropIntoUnassignedParticipants(item);
           }
-          this._dropIntoAppointment = undefined;
+          this._dropDestination = undefined;
         }
       };
     }
+
+    private _dropIntoUnassignedParticipants = (participant: Participant) => {
+      let appointment: Appointment = this._appointmentSelection.getSelection()[0] as Appointment;
+      appointment.removeParticipantByReference(participant);
+      participant.isAssigned = false;
+      let newUnassignedParticipants = this.state.participantsList.concat(participant);
+      this.setState({
+        appointmentList: this.state.appointmentList,
+        participantsList: newUnassignedParticipants
+      })
+      
+    }
+
+
+    private _dropIntoAppointment = (appointment: Appointment, participant: Participant) => {
+      if(appointment.isSlotFree){
+        console.log('dropDestination got a free Slot');
+        participant.isAssigned = true;
+        appointment.addParticipant(participant);
+        //TODO check with new render List and how to do that
+        this._removeFromParticipantList(participant);
+      }
+
+    }
+
 
     private _removeFromParticipantList(participant:Participant){
       let newParticipantsList = this.state.participantsList.filter(obj => obj !== participant);
@@ -114,17 +133,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
     }
 
 
-    private _dropIntoAppointment = (appointment: Appointment, participant: Participant) => {
-
-      console.log('MeetingStatus._dropIntoAppointment()');
-      console.log(appointment);
-      console.log(participant);
-      console.log('-------------------')
-
-
-
-    }
-
+    
     //TODO delete this
     private generateParticipantsList = ():Participant[] => {
       console.log('MeetingStatus.generateParticipantsList()');
@@ -136,6 +145,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
           id: String(index),
           name: `Tester ${String(index)}`,
           participantId: String(index),
+          isAssigned: false,
         })]);
       }
       console.log(tmpParticipantsList);
@@ -223,13 +233,15 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         name: 'Zugeteilt',
         fieldName: null,
         onRender: (item: Appointment) => {
-          if(item.participants){
+          if(item.participants.length > 0){
             return <DetailsList
             items={item.participants}
+            dragDropEvents={this._dragDropEvents}
+            columns={this.state.assignedParticipantsColumns}
             checkboxVisibility={CheckboxVisibility.hidden}
           />;
           } else {
-            return <div> Empty </div>
+            return <div> Leer </div>
           }
         },
         minWidth: 40,
@@ -238,7 +250,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       return columns;
     }
 
-    private _setUserColumnNames = ():IColumn[] => {
+    private _setUnassignedParticipantColumnNames = ():IColumn[] => {
       let columns:IColumn[] = [{
         key: 'column1',
         name: 'Eingeladener Benutzer',
@@ -251,10 +263,26 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         fieldName: 'eMail',
         minWidth: 100,
         maxWidth: 350,
-      } as IColumn,]
+      } as IColumn]
       return columns;
     }
 
+    private _setAssignedParticipantColumnNames = ():IColumn[] =>{
+      let columns:IColumn[] = [{
+        key: 'column1',
+        name: 'Benutzername',
+        fieldName: 'name',
+        minWidth: 50,
+        maxWidth: 150,
+      } as IColumn,{
+        key: 'column2',
+        name: 'E-Mail',
+        fieldName: 'eMail',
+        minWidth: 50,
+        maxWidth: 150,
+      } as IColumn]
+      return columns;
+    }
     
 
     public render(): React.ReactElement<IMeetingStatusProps> {
@@ -265,7 +293,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
               <DetailsList
                 items={this.state.appointmentList}
                 columns={this.state.appointmentColumns}
-                // selection={this._appointmentSelection}
+                selection={this._appointmentSelection}
                 dragDropEvents={this._dragDropEvents}
                 checkboxVisibility={CheckboxVisibility.hidden}
               />
@@ -273,8 +301,8 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
             <div>
               <DetailsList
               items={this.state.participantsList}
-              columns={this.state.userColumns}
-              selection={this._participantSelection}
+              columns={this.state.unassignedParticipantsColumns}
+              selection={this._unassignedParticipantSelection}
               dragDropEvents={this._dragDropEvents}
               checkboxVisibility={CheckboxVisibility.hidden}
               />

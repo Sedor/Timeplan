@@ -17,7 +17,7 @@ export class Appointment {
     appointmentStart: string;
     appointmentEnd: string;
     personCount: number;
-    participants: Participant[];
+    participants: Participant[] = [];
 
     private _WeekdaysGerman = [
         'Sonntag',
@@ -61,6 +61,14 @@ export class Appointment {
         }else{
             this.participants = [participant];
         }
+    }
+
+    public removeParticipantByReference(participant:Participant){
+        console.log('removeParticipantByReference');
+        console.log(participant);
+        console.log(this.participants);
+        this.participants = this.participants.filter(obj => obj !== participant);
+        console.log(this.participants);
     }
 
 }
