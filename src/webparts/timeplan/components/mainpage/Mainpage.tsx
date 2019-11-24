@@ -8,40 +8,31 @@ import { Link } from 'react-router-dom';
 import { DefaultButton } from 'office-ui-fabric-react';
 import { DetailsList, Selection, IColumn, SelectionMode, CheckboxVisibility} from 'office-ui-fabric-react/lib/DetailsList';
 
-const initialState: IMainPageState = {
-    meetingList: [],
-    columns: [],
-    selectedMeeting: undefined,
-}
-
 export class MainPage extends React.Component < any, IMainPageState > {
 
-    state: IMainPageState = initialState;
     props: any;
     private selection: Selection;
 
     constructor(props: any){
       super(props);
-      this.props = props;
       this.initializeSelectionCallback();
+      console.log('Constructor')
+      this.state = {
+        meetingList: [],
+        columns: this.setColumnNames(),
+        selectedMeeting: undefined,
+      }
       MeetingService.getMeetingList().then( list => {
-        let columns = this.setColumnNames();
         this.setState({
-          meetingList: list,
-          columns: columns,
-          selectedMeeting: this._getSelectedMeeting()})
-        ;});
-
-      this.initializeSelectionCallback = this.initializeSelectionCallback.bind(this);
-      
+          meetingList: list.concat([]),
+        });
+      });
     }
 
-    private initializeSelectionCallback():void {
+    private initializeSelectionCallback = ():void => {
       this.selection = new Selection({
         onSelectionChanged: () => {
           this.setState({
-            meetingList: this.state.meetingList, 
-            columns: this.state.columns,
             selectedMeeting:this._getSelectedMeeting()
           })
         }
@@ -50,8 +41,6 @@ export class MainPage extends React.Component < any, IMainPageState > {
 
     private _getSelectedMeeting():Meeting {
       console.log('_getSelectedMeeting');
-      console.log(this.selection.getSelection()[0]);
-      
       if((this.selection.getSelection()[0] as Meeting) === undefined){
         return this.state.selectedMeeting;
       }else{

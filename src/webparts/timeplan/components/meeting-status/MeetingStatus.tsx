@@ -89,25 +89,41 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         onDragEnd: (item?: any, event?: DragEvent) => {
           console.log('onDragEnd()');
           if ((item instanceof Participant) && (this._dropDestination instanceof Appointment)) {
-            this._dropIntoAppointment(this._dropDestination, item);
-            //TODO need to differentiate if i drop from appointment to appointment
+            if(item.isAssigned){
+              this._dopFromAppointmentToAppointment(this._dropDestination, item);
+            } else {
+              this._dropIntoAppointment(this._dropDestination, item);  
+            } 
           } else if ((item instanceof Participant) && (this._dropDestination instanceof Participant)){
-            //
-            this._dropIntoUnassignedParticipants(item);
+            if(item.isAssigned){
+              this._dropIntoUnassignedParticipants(item);
+            }
           }
           this._dropDestination = undefined;
         }
       };
     }
 
+    private _dopFromAppointmentToAppointment = (appointmentToInsertTo:Appointment, participant: Participant) => {
+      let appointmentToRemoveFrom: Appointment = this._appointmentSelection.getSelection()[0] as Appointment;
+      if(appointmentToInsertTo.isSlotFree && (appointmentToRemoveFrom !== appointmentToInsertTo)){
+        appointmentToRemoveFrom.removeParticipantByReference(participant);
+        appointmentToInsertTo.addParticipant(participant);
+        this.setState({
+          appointmentList: this.state.appointmentList.concat([])
+        });
+      }else{
+        console.log('No Free Slot');
+      }
+    }
+
     private _dropIntoUnassignedParticipants = (participant: Participant) => {
       let appointment: Appointment = this._appointmentSelection.getSelection()[0] as Appointment;
       appointment.removeParticipantByReference(participant);
       participant.isAssigned = false;
-      let newUnassignedParticipants = this.state.participantsList.concat(participant);
       this.setState({
-        appointmentList: this.state.appointmentList,
-        participantsList: newUnassignedParticipants
+        appointmentList: this.state.appointmentList.concat([]),
+        participantsList: this.state.participantsList.concat(participant)
       })
       
     }
@@ -115,20 +131,22 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
 
     private _dropIntoAppointment = (appointment: Appointment, participant: Participant) => {
       if(appointment.isSlotFree){
-        console.log('dropDestination got a free Slot');
         participant.isAssigned = true;
         appointment.addParticipant(participant);
-        //TODO check with new render List and how to do that
+        this.setState({
+          appointmentList: this.state.appointmentList.concat([])
+        })
         this._removeFromParticipantList(participant);
+      }else{
+        console.log('No Free Slot');
       }
 
     }
 
 
     private _removeFromParticipantList(participant:Participant){
-      let newParticipantsList = this.state.participantsList.filter(obj => obj !== participant);
       this.setState({
-        participantsList: newParticipantsList
+        participantsList: this.state.participantsList.filter(obj => obj !== participant)
       });
     }
 
@@ -183,9 +201,10 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         console.log(this.state);
     }
 
-    _check = () => {
-      console.log('Check()');
-      console.log(this.state)
+    private _distribute = () => {
+      console.log('MeetingStatus.verteilen()');
+      alert('start distributiong !');
+      //TODO do this
     }
 
     private _setAppointmentColumnNames():IColumn[] {
@@ -308,11 +327,13 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
               />
             </div> 
             <div>
+              <DefaultButton text='Verteilen' onClick={this._distribute}/>
+            </div>
+            <div>
                 <Link to='/'>
                     <DefaultButton text='Zurueck' /> 
                 </Link>
                 <DefaultButton text='Speichern' onClick={this._saveDistribution}/>
-                <DefaultButton text='Check' onClick={this._check}/>
             </div>
         </div >
         );
