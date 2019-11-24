@@ -1,4 +1,5 @@
 import { User, IUser } from './User';
+import { Appointment } from '../Appointment/Appointment';
 
 
 export interface IParticipant extends IUser{    
@@ -12,7 +13,8 @@ export class Participant extends User{
 
     participantId: string;
     isAssigned: boolean;
-    appointmentPriority: Map<string, number>;
+    // <AppointmentID, Priority>
+    appointmentPriority: Map<string, number> = new Map();
 
 
     constructor(obj: IParticipant ) {
@@ -21,4 +23,12 @@ export class Participant extends User{
             this[key] = obj[key];
         }
     }
+
+    public setPriority(appointment:Appointment, value:number){
+        // TODO check if it will be unique in the Map
+        this.appointmentPriority.set(appointment.sharepointPrimaryId, value);
+
+    }
+
+
 }

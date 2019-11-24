@@ -7,18 +7,33 @@ import { Meeting } from '../../data/Meeting/Meeting';
 import { Appointment } from '../../data/Appointment/Appointment';
 import { User } from '../../data/User/User';
 import { AppointmentService } from '../../service/Appointment-Service';
+import { Dropdown, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 
 import { DefaultButton } from 'office-ui-fabric-react';
 import { DetailsList, Selection, IColumn, SelectionMode, CheckboxVisibility} from 'office-ui-fabric-react/lib/DetailsList';
 import { Link } from 'react-router-dom';
+import { Participant } from '../../data/User/Participant';
+import { DistributionNames } from '../../data/Distributions/DistributionNames';
+
+
+const dropDownOption: IDropdownOption[] = [{
+  key: '1',
+  text: '1'
+},{
+  key: '2',
+  text: '2'
+},{
+  key: '3',
+  text: '3'
+}];
 
 export class SetPreference extends React.Component < any, ISetPreferenceState > {
 
-    // state: IMeetingStatusState = initialState;
-    private selection: Selection;
+    private _appointmentSelection: Selection;
 
     constructor(props: any){
         super(props);
+        this._appointmentSelection = new Selection();
         this.state = {
             meeting: new Meeting({title:''}),
             appointmentList: [],
@@ -30,15 +45,45 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
         // window.addEventListener("beforeunload", this._handleWindowBeforeUnload);
         console.log('in ComponentDidMount');
         if(this.props.location.state !== undefined){
-            console.log('this.prop.location.state is defined');
             if(this.props.location.state.selectedMeeting !== undefined){
-                console.log('this.prop.location.state.selectedMeeting is defined');
+                //TODO get Current User from location.histoy
+                
+                let meeting:Meeting = (this.props.location.state.selectedMeeting as Meeting);
+                if(meeting.distribution === DistributionNames.FAIRDISTRO){
+                  //TODO activate priority
+                  console.log('activating Priority');
+                  let tmpColumns = this.state.appointmentColumns.concat({
+                    key: 'column6',
+                    name: 'Auswahl',
+                    fieldName: null,
+                    onRender: (item: Appointment) => {
+                      return <div>
+                        <Dropdown
+                          placeHolder='0'
+                          onChanged={this._onDropdownChange}
+                          selectedKey={this.state.participant.appointmentPriority.get(item.sharepointPrimaryId) ?
+                            String(this.state.participant.appointmentPriority.get(item.sharepointPrimaryId)) : '1'}
+                          options={dropDownOption}
+                        />
+                      </div>;
+                    },
+                    minWidth: 50,
+                    maxWidth: 100,
+                  });
+                  this.setState({
+                    appointmentColumns: tmpColumns,
+                  })
+                }
 
-                let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
-                AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.getSharepointPrimaryId()).then(appointmentList =>{
+                AppointmentService.getAppointmentListForMeetingId(meeting.getSharepointPrimaryId()).then(appointmentList =>{
                     this.setState({
-                        meeting: meetingToUpgrade,
+                        meeting: meeting,
                         appointmentList: appointmentList,
+                        participant: new Participant({
+                          eMail: 'hans.hansen@web.de',
+                          name: 'Hans Hansen',
+                          appointmentPriority: new Map<string, number>()
+                        })
                     })
                 });
                 console.log('ended ComponentDidMount');
@@ -46,8 +91,15 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
         }
     }
 
-    private _savePreferences(){
-        alert('would save Preferences');
+    private _savePreferences = () => {
+        console.log('would save Preferences');
+        console.log(this.state);
+    }
+
+    private _onDropdownChange = (item: IDropdownOption) => {
+      console.log('_onDropdownChange()');
+      let participant:Participant = this.state.participant;
+      participant.setPriority(this._appointmentSelection.getSelection()[0] as Appointment, parseInt(item.text))
     }
 
     private _setAppointmentColumnNames():IColumn[] {
@@ -60,7 +112,7 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
           onRender: (item: Appointment) => {
             return <span>{item.getDateAsDIN5008Format()}</span>;
           }
-        } as IColumn,{
+        },{
           key: 'column2',
           name: 'Tag',
           fieldName: null,
@@ -69,28 +121,19 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
           onRender: (item: Appointment) => {
             return <span>{item.getDayName()}</span>;
           }
-        } as IColumn,{
+        },{
           key: 'column3',
           name: 'Von',
           fieldName: 'appointmentStart',
-          minWidth: 100,
-          maxWidth: 350,
-        } as IColumn,{
+          minWidth: 50,
+          maxWidth: 100,
+        },{
           key: 'column4',
           name: 'Bis',
           fieldName: 'appointmentEnd',
-          minWidth: 100,
-          maxWidth: 350,
-        } as IColumn,{
-          key: 'column5',
-          name: 'Personen',
-          fieldName: null,
-          onRender: (item: Appointment) => {
-            return <span>{item.personCount}</span>;
-          },
-          minWidth: 100,
-          maxWidth: 350,
-        } as IColumn,]
+          minWidth: 50,
+          maxWidth: 100,
+        }]
         return columns;
       }
 
@@ -104,7 +147,7 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
                 items={this.state.appointmentList}
                 columns={this.state.appointmentColumns}
                 // selectionPreservedOnEmptyClick={true}
-                selection={this.selection}
+                selection={this._appointmentSelection}
                 checkboxVisibility={CheckboxVisibility.hidden}
                 />
             </div>

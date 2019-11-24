@@ -3,7 +3,7 @@ import styles from './CreateMeeting.module.scss';
 import { ICreateMeetingProps } from './ICreateMeetingProps';
 import { IMeetingState } from './IMeetingState';
 import { Appointment } from '../../data/Appointment/Appointment';
-import { User,IUser } from '../../data/User/User';
+import { User } from '../../data/User/User';
 import { Meeting } from '../../data/Meeting/Meeting';
 import { MeetingStatus } from '../../data/Meeting/MeetingStatus';
 import { MeetingService } from '../../service/Meeting-Service';
@@ -323,8 +323,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     private _generateDistributionDropdownOptions = ():IDropdownOption[] => {
         console.log('_generateDistributionDropdownOptions()');
-        let dropdownOptions:IDropdownOption[];
-        dropdownOptions = [];
+        let dropdownOptions:IDropdownOption[] = [];
         for (let item in DistributionNames){
             if(!(dropdownOptions.some(e => e.text === item))){
                 dropdownOptions.push({
