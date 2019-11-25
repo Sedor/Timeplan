@@ -72,6 +72,10 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
         // AppointmentService.addAppointment(appointment).then(result => {console.log('addded appointment')})
     }
 
+    public getCurrentUser(){
+        UserService.getCurrentUser();
+
+    }
 
     public testAssignedRoleOfCurrentUser() {
             // UserService.createParticipantsList(null);
@@ -108,6 +112,9 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
             </div>
             <div>
                 <button onClick={this.testPermissions}>Test Permissions</button>
+            </div>
+            <div>
+                <button onClick={this.getCurrentUser}>Get CurrentUser</button>
             </div>
         </div >
         );

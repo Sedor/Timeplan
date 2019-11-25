@@ -1,5 +1,6 @@
 import { sp, ItemAddResult, PrincipalType, PrincipalSource, PeoplePickerEntity  } from '@pnp/sp';
 import { User } from '../data/User/User'
+import { CurrentUser } from '@pnp/sp/src/siteusers'; 
 
 export class UserService {
 
@@ -29,6 +30,24 @@ export class UserService {
             }
         });
     }
+
+
+    public static async getCurrentUser():Promise<User> {
+        return await sp.web.currentUser.get().then( result => {
+            console.log('User-Service.getCurrentUser()');
+            return new User({
+                eMail: result.Email,
+                name: result.Title
+            });
+        });       
+    }
+
+    public static async isCurrentUserSiteAdmin():Promise<boolean>{
+        return await sp.web.currentUser.get().then( result => {
+            return (result.IsSiteAdmin as boolean);
+        })
+    }
+
 
     public static async getUserSearch(search: string):Promise<User[]> {
         return await sp.profiles.clientPeoplePickerSearchUser({
@@ -85,7 +104,7 @@ export class UserService {
             });
             batch.execute();
         })
-    } 
+    }
 
 }
 

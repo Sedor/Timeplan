@@ -3,10 +3,12 @@ import styles from './Mainpage.module.scss';
 import { IMainPageState } from './IMainPageState';
 import { IMainPageProps } from './IMainPageProps';
 import { Meeting } from '../../data/Meeting/Meeting';
+import { User } from '../../data/User/User';
 import { MeetingService } from '../../service/Meeting-Service';
 import { Link } from 'react-router-dom';
 import { DefaultButton } from 'office-ui-fabric-react';
 import { DetailsList, Selection, IColumn, SelectionMode, CheckboxVisibility} from 'office-ui-fabric-react/lib/DetailsList';
+import { UserService } from '../../service/User-Service';
 
 export class MainPage extends React.Component < any, IMainPageState > {
 
@@ -15,6 +17,8 @@ export class MainPage extends React.Component < any, IMainPageState > {
 
     constructor(props: any){
       super(props);
+      this._setCurrentUser();
+      this._setIsSiteAdmin();
       this.initializeSelectionCallback();
       console.log('Constructor')
       this.state = {
@@ -27,6 +31,30 @@ export class MainPage extends React.Component < any, IMainPageState > {
           meetingList: list.concat([]),
         });
       });
+    }
+
+    componentDidMount(){
+      MeetingService.getMeetingList().then( list => {
+        this.setState({
+          meetingList: list.concat([]),
+        });
+      });
+    }
+
+    private _setIsSiteAdmin(){
+      UserService.isCurrentUserSiteAdmin().then( (isSiteAdmin:boolean) => {
+        this.setState({
+          isSiteAdmin: isSiteAdmin,
+        })
+      })
+    }
+
+    private _setCurrentUser(){
+      UserService.getCurrentUser().then((currentUser:User) =>{
+        this.setState({
+          currentUser: currentUser,
+        })
+      })
     }
 
     private initializeSelectionCallback = ():void => {
@@ -90,8 +118,46 @@ export class MainPage extends React.Component < any, IMainPageState > {
       alert('Please select a Meeting');
     }
 
+    private _renderSiteAdminButtons = () => {
+      if(this.state.isSiteAdmin){
+        return (
+          <span> 
+            <Link to='/CreateMeeting'>
+              <DefaultButton text='Neue Veranstaltung' /> 
+            </Link>
+            {this.state.selectedMeeting !== undefined ? 
+            <Link to={{
+                        pathname: '/CreateMeeting',
+                        state: {
+                          selectedMeeting: this.state.selectedMeeting
+                        }
+                      }}
+            >
+              <DefaultButton text='Bearbeiten' />
+            </Link>
+            :
+            <DefaultButton text='Bearbeiten' onClick={this._clickedEditWithoutSelection}/>
+            }
+            {this.state.selectedMeeting !== undefined ? 
+            <Link to={{
+                        pathname: '/MeetingStatus',
+                        state: {
+                          selectedMeeting: this.state.selectedMeeting
+                          }
+                      }}>
+              <DefaultButton text='Status' />
+            </Link>
+            :
+            <DefaultButton text='Status' onClick={this._clickedStatusWithoutSelection}/>
+            }
+          </span>
+        );
+      } else {
+        return 
+      }
+    }
+
     public render(): React.ReactElement<IMainPageProps> {
-      MeetingService.getMeetingList().then( list => {this.state.meetingList = list;} );
       return(
       <div>
         <div>
@@ -104,39 +170,14 @@ export class MainPage extends React.Component < any, IMainPageState > {
                 selection={this.selection}
                 checkboxVisibility={CheckboxVisibility.hidden}
               />
-              <Link to='/CreateMeeting'>
-                <DefaultButton text='Neue Veranstaltung' /> 
-              </Link>
-            {this.state.selectedMeeting !== undefined ? 
-                <Link to={{
-                  pathname: '/CreateMeeting',
-                  state: {
-                    selectedMeeting: this.state.selectedMeeting
-                    }
-                  }}>
-                  <DefaultButton text='Bearbeiten' />
-                </Link>
-              :
-              <DefaultButton text='Bearbeiten' onClick={this._clickedEditWithoutSelection}/>
-            }
-            {this.state.selectedMeeting !== undefined ? 
-              <Link to={{
-                pathname: '/MeetingStatus',
-                state: {
-                  selectedMeeting: this.state.selectedMeeting
-                  }
-                }}>
-                <DefaultButton text='Status' />
-              </Link>
-              :
-              <DefaultButton text='Status' onClick={this._clickedStatusWithoutSelection}/>
-            }
+            {this._renderSiteAdminButtons()}
             {this.state.selectedMeeting !== undefined ? 
               <Link to={{
                 pathname: '/SetPreference',
                 state: {
-                  selectedMeeting: this.state.selectedMeeting
-                  }
+                  selectedMeeting: this.state.selectedMeeting,
+                  currentUser: this.state.currentUser  
+                }
                 }}>
                 <DefaultButton text='Preference' />
               </Link>

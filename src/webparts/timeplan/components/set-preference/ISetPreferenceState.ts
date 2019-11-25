@@ -8,4 +8,5 @@ export interface ISetPreferenceState{
     appointmentList?: Appointment[],
     appointmentColumns?:IColumn[],
     participant?:Participant
+    comboBoxMap?:Map<string,boolean>
 }
