@@ -52,7 +52,8 @@ export class Appointment {
     }
 
     public isSlotFree():boolean {
-        return (this.participants.length <= this.personCount);
+        console.log('isSlotFree()');
+        return (this.participants.length+1 <= this.personCount);
     }
 
     public addParticipant(participant:Participant){
