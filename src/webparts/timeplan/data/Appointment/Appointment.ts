@@ -52,7 +52,7 @@ export class Appointment {
     }
 
     public isSlotFree():boolean {
-        return this.participants.length <= this.personCount;
+        return (this.participants.length <= this.personCount);
     }
 
     public addParticipant(participant:Participant){
@@ -64,11 +64,8 @@ export class Appointment {
     }
 
     public removeParticipantByReference(participant:Participant){
-        console.log('removeParticipantByReference');
-        console.log(participant);
-        console.log(this.participants);
+        console.log('Appointments.removeParticipantByReference()');
         this.participants = this.participants.filter(obj => obj !== participant);
-        console.log(this.participants);
     }
 
 }

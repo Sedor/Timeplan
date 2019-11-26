@@ -105,9 +105,8 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
     }
 
     private _dopFromAppointmentToAppointment = (appointmentToInsertTo:Appointment, participant: Participant) => {
-      let appointmentToRemoveFrom: Appointment = this._appointmentSelection.getSelection()[0] as Appointment;
-      if(appointmentToInsertTo.isSlotFree && (appointmentToRemoveFrom !== appointmentToInsertTo)){
-        appointmentToRemoveFrom.removeParticipantByReference(participant);
+      if(appointmentToInsertTo.isSlotFree()){
+        this.state.appointmentList.map(appointment => appointment.removeParticipantByReference(participant));
         appointmentToInsertTo.addParticipant(participant);
         this.setState({
           appointmentList: this.state.appointmentList.concat([])
@@ -118,8 +117,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
     }
 
     private _dropIntoUnassignedParticipants = (participant: Participant) => {
-      let appointment: Appointment = this._appointmentSelection.getSelection()[0] as Appointment;
-      appointment.removeParticipantByReference(participant);
+      this.state.appointmentList.map(appointment => appointment.removeParticipantByReference(participant));
       participant.isAssigned = false;
       this.setState({
         appointmentList: this.state.appointmentList.concat([]),
@@ -128,9 +126,8 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       
     }
 
-
     private _dropIntoAppointment = (appointment: Appointment, participant: Participant) => {
-      if(appointment.isSlotFree){
+      if(appointment.isSlotFree()){
         participant.isAssigned = true;
         appointment.addParticipant(participant);
         this.setState({
@@ -143,15 +140,12 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
 
     }
 
-
     private _removeFromParticipantList(participant:Participant){
       this.setState({
         participantsList: this.state.participantsList.filter(obj => obj !== participant)
       });
     }
 
-
-    
     //TODO delete this
     private generateParticipantsList = ():Participant[] => {
       console.log('MeetingStatus.generateParticipantsList()');
