@@ -11,10 +11,12 @@ import { Dropdown, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 import { Checkbox } from 'office-ui-fabric-react/lib/Checkbox';
 
 import { DefaultButton } from 'office-ui-fabric-react';
-import { DetailsList, Selection, IColumn, SelectionMode, CheckboxVisibility} from 'office-ui-fabric-react/lib/DetailsList';
+import { DetailsList, Selection, IColumn, CheckboxVisibility} from 'office-ui-fabric-react/lib/DetailsList';
 import { Link } from 'react-router-dom';
 import { Participant } from '../../data/User/Participant';
 import { DistributionNames } from '../../data/Distributions/DistributionNames';
+import { CurrentUser } from '../../../../../node_modules/@pnp/sp/src/siteusers';
+import { DistributionService } from '../../service/Distribution-Service';
 
 
 const dropDownOption: IDropdownOption[] = [{
@@ -38,7 +40,8 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
       this.state = {
           meeting: new Meeting({title:''}),
           appointmentList: [],
-          appointmentColumns: this._setAppointmentColumnNames()
+          appointmentColumns: this._setAppointmentColumnNames(),
+          currentUser: new User({})
       }
   }
 
@@ -48,7 +51,10 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
       if(this.props.location.state !== undefined){
           if(this.props.location.state.selectedMeeting !== undefined){
               //TODO get Current User from location.histoy
-              
+              console.log('test');
+              console.log(this.props);
+
+              let currentUser:User = (this.props.location.state.currentUser as User);
               let meeting:Meeting = (this.props.location.state.selectedMeeting as Meeting);
               if(meeting.distribution === DistributionNames.FAIRDISTRO){
                 this._activatePriorityMode();
@@ -57,20 +63,17 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
               }
 
               AppointmentService.getAppointmentListForMeetingId(meeting.getSharepointPrimaryId()).then(appointmentList =>{
-                let comboBoxDefautlValues:Map<string,boolean> = appointmentList.reduce(
+                let checkBoxDefautlValues:Map<string,boolean> = appointmentList.reduce(
                   (map: Map<string,boolean>, appointment:Appointment) => {
                     map.set(appointment.sharepointPrimaryId, false);
                   return map
                   }, new Map<string,boolean>());
                 this.setState({
-                    meeting: meeting,
-                    appointmentList: appointmentList,
-                    participant: new Participant({
-                      eMail: 'hans.hansen@web.de', //TODO add the current User here
-                      name: 'Hans Hansen',
-                      appointmentPriority: new Map<string, number>()
-                    }),
-                    comboBoxMap: comboBoxDefautlValues
+                  meeting: meeting,
+                  appointmentList: appointmentList,
+                  currentUser: currentUser,
+                  comboBoxMap: new Map<string,number>(),
+                  checkBoxMap: checkBoxDefautlValues
                 })
               });
           }
@@ -86,7 +89,7 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
       onRender: (item: Appointment) => {
         return <div>
           <Checkbox
-            checked={this.state.comboBoxMap.get(item.sharepointPrimaryId)}
+            checked={this.state.checkBoxMap.get(item.sharepointPrimaryId)}
             onChange={this._onClickedCheckbox}
           />
         </div>;
@@ -103,15 +106,14 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
     console.log('SetPreference._activatePriorityMode()');
     let tmpColumns = this.state.appointmentColumns.concat({
       key: 'column6',
-      name: 'Auswahl',
+      name: 'Prioritaet',
       fieldName: null,
       onRender: (item: Appointment) => {
         return <div>
           <Dropdown
-            placeHolder='0'
             onChanged={this._onDropdownChange}
-            selectedKey={this.state.participant.appointmentPriority.get(item.sharepointPrimaryId) ?
-              String(this.state.participant.appointmentPriority.get(item.sharepointPrimaryId)) : '1'}
+            selectedKey={this.state.checkBoxMap.get(item.sharepointPrimaryId) ?
+              String(this.state.checkBoxMap.get(item.sharepointPrimaryId)) : '1'}
             options={dropDownOption}
           />
         </div>;
@@ -131,20 +133,23 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
 
   private _onDropdownChange = (item: IDropdownOption) => {
     console.log('_onDropdownChange()');
-    let participant:Participant = this.state.participant;
-    participant.setPriority(this._appointmentSelection.getSelection()[0] as Appointment, parseInt(item.text))
+    this.state.comboBoxMap.set((this._appointmentSelection.getSelection()[0] as Appointment).sharepointPrimaryId, parseInt(item.text))
+  }
+
+  private _distributionDescription(distributionNames: DistributionNames){
+    return DistributionService.getDistributionDescription(distributionNames);
   }
 
   private _onClickedCheckbox = (ev: React.FormEvent<HTMLElement>, checked: boolean) => {
     console.log('SetPreference._onClickedCheckbox()');
-    let comboBoxDefautlValues:Map<string,boolean> = this.state.appointmentList.reduce(
+    let checkBoxDefautlValues:Map<string,boolean> = this.state.appointmentList.reduce(
       (map: Map<string,boolean>, appointment:Appointment) => {
         map.set(appointment.sharepointPrimaryId, false);
       return map
       }, new Map<string,boolean>());
-      comboBoxDefautlValues.set((this._appointmentSelection.getSelection()[0] as Appointment).sharepointPrimaryId, true);
+      checkBoxDefautlValues.set((this._appointmentSelection.getSelection()[0] as Appointment).sharepointPrimaryId, true);
     this.setState({
-      comboBoxMap: comboBoxDefautlValues,
+      checkBoxMap: checkBoxDefautlValues,
       appointmentList: this.state.appointmentList.concat([])
     });
   }
@@ -188,7 +193,8 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
   public render(): React.ReactElement<ISetPreferenceProps> {
       return(
       <div>
-        <h1>Set Preference</h1>
+        <h1>Bitte setzen sie Ihre Wahl</h1>
+        <h3>{this._distributionDescription(this.state.meeting.distribution)}</h3>
         <div>
               <DetailsList
               items={this.state.appointmentList}

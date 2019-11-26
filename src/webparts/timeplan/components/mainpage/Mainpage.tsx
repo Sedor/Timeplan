@@ -176,7 +176,7 @@ export class MainPage extends React.Component < any, IMainPageState > {
                 pathname: '/SetPreference',
                 state: {
                   selectedMeeting: this.state.selectedMeeting,
-                  currentUser: this.state.currentUser  
+                  currentUser: this.state.currentUser
                 }
                 }}>
                 <DefaultButton text='Preference' />
