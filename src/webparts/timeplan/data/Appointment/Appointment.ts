@@ -5,13 +5,13 @@ export interface IAppointment{
     appointmentStart?: string,
     appointmentEnd?: string,
     personCount?: number,
-    sharepointPrimaryId?: string,
+    sharepointPrimaryId?: number,
     participants?: Participant[],
 }
 
 export class Appointment {
 
-    sharepointPrimaryId?: string;
+    sharepointPrimaryId?: number;
 
     appointmentDate: Date;
     appointmentStart: string;

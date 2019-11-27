@@ -51,9 +51,6 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
       if(this.props.location.state !== undefined){
           if(this.props.location.state.selectedMeeting !== undefined){
               //TODO get Current User from location.histoy
-              console.log('test');
-              console.log(this.props);
-
               let currentUser:User = (this.props.location.state.currentUser as User);
               let meeting:Meeting = (this.props.location.state.selectedMeeting as Meeting);
               if(meeting.distribution === DistributionNames.FAIRDISTRO){
@@ -63,16 +60,16 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
               }
 
               AppointmentService.getAppointmentListForMeetingId(meeting.getSharepointPrimaryId()).then(appointmentList =>{
-                let checkBoxDefautlValues:Map<string,boolean> = appointmentList.reduce(
-                  (map: Map<string,boolean>, appointment:Appointment) => {
+                let checkBoxDefautlValues:Map<number,boolean> = appointmentList.reduce(
+                  (map: Map<number,boolean>, appointment:Appointment) => {
                     map.set(appointment.sharepointPrimaryId, false);
                   return map
-                  }, new Map<string,boolean>());
+                  }, new Map<number,boolean>());
                 this.setState({
                   meeting: meeting,
                   appointmentList: appointmentList,
                   currentUser: currentUser,
-                  comboBoxMap: new Map<string,number>(),
+                  comboBoxMap: new Map<number,number>(),
                   checkBoxMap: checkBoxDefautlValues
                 })
               });
@@ -142,11 +139,11 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
 
   private _onClickedCheckbox = (ev: React.FormEvent<HTMLElement>, checked: boolean) => {
     console.log('SetPreference._onClickedCheckbox()');
-    let checkBoxDefautlValues:Map<string,boolean> = this.state.appointmentList.reduce(
-      (map: Map<string,boolean>, appointment:Appointment) => {
+    let checkBoxDefautlValues:Map<number,boolean> = this.state.appointmentList.reduce(
+      (map: Map<number,boolean>, appointment:Appointment) => {
         map.set(appointment.sharepointPrimaryId, false);
       return map
-      }, new Map<string,boolean>());
+      }, new Map<number,boolean>());
       checkBoxDefautlValues.set((this._appointmentSelection.getSelection()[0] as Appointment).sharepointPrimaryId, true);
     this.setState({
       checkBoxMap: checkBoxDefautlValues,

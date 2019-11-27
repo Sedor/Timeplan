@@ -1,5 +1,5 @@
 export interface IUser{    
-    id?: string;
+    sharepointId?: number;
     name?: string;
     eMail?: string;
 }
@@ -7,7 +7,7 @@ export interface IUser{
 
 export class User{
 
-    public id: string;
+    public sharepointId: number;
     public name: string;
     public eMail: string;
 
@@ -17,15 +17,15 @@ export class User{
         }
     }
 
-    public get Id():string {
-        return this.id;
+    public getSharepointId():number {
+        return this.sharepointId;
     }
 
-    public get Name():string {
+    public getName():string {
         return this.name;
     }
 
-    public get EMail():string {
+    public getEMail():string {
         return this.eMail;
     }
 }

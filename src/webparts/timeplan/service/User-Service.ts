@@ -4,31 +4,43 @@ import { CurrentUser } from '@pnp/sp/src/siteusers';
 
 export class UserService {
 
-    static readonly invitationListName:string = 'Invitation';
+    static readonly invitedUserList:string = 'Invitation';
 
 
-    public static async saveInvitedUser(meetingId:string, user:User){
+    public static async saveInvitedUser(meetingId:number, user:User){
         console.log('Service.saveInvitedUser()');
-        console.log(user);
-        return await sp.web.lists.getByTitle(this.invitationListName).items.add({
-            Title: String(meetingId),
+        return await sp.web.lists.getByTitle(this.invitedUserList).items.add({
+            Title: meetingId,
             UserName: user.name,
             UserEmail: user.eMail
         })
     }
 
     //TODO Ask if userEmail is unique (one problem is Admin account has the same as User account)
-    public static async saveInvitedUsers(meetingId:string, userList: User[]){
-        console.log('Service.saveInvitedUsers()');
-        console.log(meetingId);
-        console.log(userList);
+    public static async batchSaveInvitedUsers(meetingId:number, userList: User[]){
+        console.log('Service.batchSaveInvitedUsers()');
+        let batch = sp.web.createBatch();
         userList.forEach((user:User)=>{
-            try {
-                this.saveInvitedUser(meetingId, user);
-            } catch (error) {
-                return error;
-            }
+            sp.web.lists.getByTitle(this.invitedUserList).items.inBatch(batch).add({
+                Title: meetingId,
+                UserName: user.name,
+                UserEmail: user.eMail
+            });
         });
+        return await batch.execute();
+    }
+
+    public static async batchUpdateInvitedUsers(meetingId:number, userList:User[]){
+        console.log('Service.batchUpdateInvitedUsers()');
+        let batch = sp.web.createBatch();
+        userList.forEach((user:User)=>{
+            sp.web.lists.getByTitle(this.invitedUserList).items.inBatch(batch).getById(user.sharepointId).update({
+                Title: meetingId,
+                UserName: user.name,
+                UserEmail: user.eMail
+            })
+        })
+        return await batch.execute();
     }
 
 
@@ -70,12 +82,12 @@ export class UserService {
         })
     }
 
-    public static async getInvitedUserListForMeetingId(meetingId:string):Promise<User[]> { 
+    public static async getInvitedUserListForMeetingId(meetingId:number):Promise<User[]> { 
         try {
-            return await sp.web.lists.getByTitle(this.invitationListName).items.filter(`Title eq ${meetingId}`).get().then((itemsArray: any[]) => {
+            return await sp.web.lists.getByTitle(this.invitedUserList).items.filter(`Title eq ${meetingId}`).get().then((itemsArray: any[]) => {
                 return itemsArray.map(element => {
                     return new User({
-                        id: element.Id,
+                        sharepointId: element.Id,
                         name: element.UserName,
                         eMail: element.UserEmail,
                     });
@@ -90,17 +102,17 @@ export class UserService {
         console.log('Service.batchDeleteInvitedUser()');
         let batch = sp.web.createBatch();
         userList.forEach( user => {
-            sp.web.lists.getByTitle(this.invitationListName).items.getItemByStringId(user.id).inBatch(batch).delete();
+            sp.web.lists.getByTitle(this.invitedUserList).items.getById(user.sharepointId).inBatch(batch).delete();
         });
         batch.execute();
     }
 
-    public static async batchDeleteAllInvitedUserForMeetingID(meetingId:string) {
+    public static async batchDeleteAllInvitedUserForMeetingID(meetingId:number) {
         console.log('Service.deleteAllInvitedUserForMeetingID()');
         let batch = sp.web.createBatch();
         return await this.getInvitedUserListForMeetingId(meetingId).then((userList:User[]) => {
             userList.forEach( user => {
-                sp.web.lists.getByTitle(this.invitationListName).items.getItemByStringId(user.id).inBatch(batch).delete();
+                sp.web.lists.getByTitle(this.invitedUserList).items.getById(user.sharepointId).inBatch(batch).delete();
             });
             batch.execute();
         })

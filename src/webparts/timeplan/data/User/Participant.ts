@@ -5,7 +5,7 @@ import { Appointment } from '../Appointment/Appointment';
 export interface IParticipant extends IUser{    
     participantId?: string;
     isAssigned?: boolean;
-    appointmentPriority?: Map<string, number>;
+    appointmentPriority?: Map<number, number>;
 }
 
 
@@ -14,7 +14,7 @@ export class Participant extends User{
     participantId: string;
     isAssigned: boolean;
     // <AppointmentID, Priority>
-    appointmentPriority: Map<string, number> = new Map();
+    appointmentPriority: Map<number, number> = new Map();
 
 
     constructor(obj: IParticipant ) {

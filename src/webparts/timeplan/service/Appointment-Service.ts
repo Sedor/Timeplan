@@ -19,7 +19,7 @@ export class AppointmentService {
         return new Date(year, month, day);
     }
 
-    public static async getAppointmentListForMeetingId(meetingId:string):Promise<Appointment[]> { 
+    public static async getAppointmentListForMeetingId(meetingId:number):Promise<Appointment[]> { 
         try {
             return await sp.web.lists.getByTitle(this.appointmentListName).items.filter(`Title eq ${meetingId}`).get().then((itemsArray: any[]) => {
                 return itemsArray.map(element => {
@@ -37,10 +37,8 @@ export class AppointmentService {
         }
     }
 
-    public static async saveAppointment(meetingId:string, appointment:IAppointment){
+    public static async saveAppointment(meetingId:number, appointment:IAppointment){
         console.log('Service.saveAppointment()');
-        console.log(appointment);
-        console.log(meetingId);
         return await sp.web.lists.getByTitle(this.appointmentListName).items.add({
             Title: String(meetingId),
             zdky: this.convertTypescriptDateToSPDate(appointment.appointmentDate),
@@ -50,33 +48,53 @@ export class AppointmentService {
         })
     }
 
-    public static async saveAppointments(meetingId:string, appointmentList:Appointment[]){
-        console.log('Service.saveAppointments()');
-        console.log(appointmentList);
+
+
+    public static async batchSaveAppointments(meetingId:number, appointmentList:Appointment[]){
+        console.log('Service.batchSaveAppointments()');
+        let batch = sp.web.createBatch();
         appointmentList.forEach((appointment:Appointment)=>{
-            try {
-                this.saveAppointment(meetingId, appointment);
-            } catch (error) {
-                return error;
-            }
+            sp.web.lists.getByTitle(this.appointmentListName).items.inBatch(batch).add({
+                Title: String(meetingId),
+                zdky: this.convertTypescriptDateToSPDate(appointment.appointmentDate),
+                OData__x006d_vo4: appointment.appointmentStart,
+                h4en: appointment.appointmentEnd,
+                pexl: String(appointment.personCount)
+            });
         });
+        return await batch.execute();
+    }
+
+    public static async batchUpdateAppointments(meetingId:number, appointmentList:Appointment[]){
+        console.log('Service.batchUpdateAppointments()');
+        let batch = sp.web.createBatch();
+        appointmentList.forEach((appointment:Appointment)=>{
+            sp.web.lists.getByTitle(this.appointmentListName).items.inBatch(batch).getById(appointment.sharepointPrimaryId).update({
+                Title: String(meetingId),
+                zdky: this.convertTypescriptDateToSPDate(appointment.appointmentDate),
+                OData__x006d_vo4: appointment.appointmentStart,
+                h4en: appointment.appointmentEnd,
+                pexl: String(appointment.personCount)
+            })
+        })
+        return await batch.execute;
     }
 
     public static async batchDeleteAppointments(appointmentList:Appointment[]) {
         console.log('Service.batchDeleteAppointments()');
         let batch = sp.web.createBatch();
         appointmentList.forEach( appointment  => {
-            sp.web.lists.getByTitle(this.appointmentListName).items.getItemByStringId(appointment.sharepointPrimaryId).inBatch(batch).delete();
+            sp.web.lists.getByTitle(this.appointmentListName).items.getById(appointment.sharepointPrimaryId).inBatch(batch).delete();
         });
         batch.execute();
     }
 
-    public static async batchDeleteAppointmentsByMeetingId(meetingId:string) {
+    public static async batchDeleteAppointmentsByMeetingId(meetingId:number) {
         console.log('Service.deleteAppointmentByMeetingId()');
         let batch = sp.web.createBatch();
         return await this.getAppointmentListForMeetingId(meetingId).then((appointmentList:Appointment[]) => {
             appointmentList.forEach( appointment  => {
-                sp.web.lists.getByTitle(this.appointmentListName).items.getItemByStringId(appointment.sharepointPrimaryId).inBatch(batch).delete();
+                sp.web.lists.getByTitle(this.appointmentListName).items.getById(appointment.sharepointPrimaryId).inBatch(batch).delete();
             });
             batch.execute();
         })

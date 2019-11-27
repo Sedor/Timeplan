@@ -43,7 +43,7 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
 
     public deleteMeetingWithID4():void {
         console.log('Delete Meeting with ID 4')
-        MeetingService.deleteMeetingById('4');
+        MeetingService.deleteMeetingById(4);
     }
 
     public testPermissions(){
@@ -53,7 +53,7 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
     public getListOfAppointmentsByMeeting() {
         console.log('getListOfAppointmentsByMeeting');
         // let appointmentlist: Appointment[];
-        AppointmentService.getAppointmentListForMeetingId('1')
+        AppointmentService.getAppointmentListForMeetingId(1)
         .then(list => {
             console.log('Got AppointmentList');
             console.log(list);
@@ -83,6 +83,14 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
 
     public testUserFinding(){
         UserService.getUserSearch(null);
+    }
+
+    public testUpdate(){
+        MeetingService.testUpdate(new Meeting({
+            sharepointPrimaryId: 42,
+            title: 'JustTesting'
+        }))
+
     }
 
     public render(): React.ReactElement<IAddMeetingPageProps> {
@@ -115,6 +123,9 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
             </div>
             <div>
                 <button onClick={this.getCurrentUser}>Get CurrentUser</button>
+            </div>
+            <div>
+                <button onClick={this.testUpdate}>TestUpdate</button>
             </div>
         </div >
         );

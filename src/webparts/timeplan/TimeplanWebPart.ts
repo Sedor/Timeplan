@@ -10,6 +10,7 @@ import {
 import * as strings from 'TimeplanWebPartStrings';
 import Timeplan from './components/Timeplan';
 import { ITimeplanProps } from './components/ITimeplanProps';
+import { sp } from "@pnp/sp";
 
 export interface ITimeplanWebPartProps {
   description: string;
@@ -26,6 +27,17 @@ export default class TimeplanWebPart extends BaseClientSideWebPart<ITimeplanWebP
     );
 
     ReactDom.render(element, this.domElement);
+  }
+
+  protected onInit(): Promise<void> {
+    return super.onInit().then(_ => {
+
+      // other init code may be present
+  
+      sp.setup({
+        spfxContext: this.context
+      });
+    });
   }
 
   protected onDispose(): void {

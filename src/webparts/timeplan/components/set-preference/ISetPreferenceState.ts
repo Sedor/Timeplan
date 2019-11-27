@@ -8,6 +8,6 @@ export interface ISetPreferenceState{
     appointmentList?: Appointment[],
     appointmentColumns?:IColumn[],
     currentUser?:User,
-    comboBoxMap?:Map<string, number>,
-    checkBoxMap?:Map<string, boolean>
+    comboBoxMap?:Map<number, number>,
+    checkBoxMap?:Map<number, boolean>
 }

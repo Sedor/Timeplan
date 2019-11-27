@@ -3,7 +3,7 @@ import { MeetingStatus } from './MeetingStatus';
 
 
 export interface IMeeting{    
-    sharepointPrimaryId?: string;
+    sharepointPrimaryId?: number;
     title?: string;
     description?: string;
     distribution?: DistributionNames;
@@ -12,7 +12,7 @@ export interface IMeeting{
 
 export class Meeting{
 
-    sharepointPrimaryId: string;
+    sharepointPrimaryId: number;
     title: string;
     description: string;
     distribution: DistributionNames;
@@ -36,7 +36,7 @@ export class Meeting{
         this.description = description;
     }
 
-    public getSharepointPrimaryId():string {
+    public getSharepointPrimaryId():number {
         return this.sharepointPrimaryId;
     }
 

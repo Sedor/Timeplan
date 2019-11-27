@@ -154,7 +154,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         tmpParticipantsList = tmpParticipantsList.concat([new Participant({
           appointmentPriority: new Map(),
           eMail: 'test@test.com',
-          id: String(index),
+          sharepointId: index,
           name: `Tester ${String(index)}`,
           participantId: String(index),
           isAssigned: false,

@@ -180,7 +180,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         } else {
             let toRemoveUser = this.state.selectedUser;
             let tmpInvitedUserList:User[] = this.state.invitedUserList.filter(obj => obj !== toRemoveUser);
-            if(this.state.selectedUser.id){
+            if(this.state.selectedUser.sharepointId){
                 this.setState({
                     invitedUserDeletionList : tmpInvitedUserList.concat([toRemoveUser]),
                 });
@@ -205,14 +205,36 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     private _saveNewMeeting = () => {
         console.log('CreateMeeting._saveNewMeeting()');
         try {
-            MeetingService.saveMeeting(this.state.meeting).then((meetingId:string)=> {
-                AppointmentService.saveAppointments(meetingId, this.state.appointmentList);
-                UserService.saveInvitedUsers(meetingId, this.state.invitedUserList);
+            MeetingService.saveMeeting(this.state.meeting).then((meetingId:number)=> {
+                this._saveAppointments(meetingId, this.state.appointmentList);
+                this._saveInvitedUsers(meetingId, this.state.invitedUserList);
             });
         } catch (error) {
             console.log('boooom');
             console.log(error);
             alert('saving new Meeting went wrong');
+        }
+    }
+
+    private _saveAppointments(meetingId:number, appointments:Appointment[]){
+        let appointmentListToUpdate: Appointment[] = appointments.filter( obj => obj.sharepointPrimaryId);
+        if(appointmentListToUpdate.length>0){
+            AppointmentService.batchUpdateAppointments(meetingId, appointmentListToUpdate);
+        }
+        let appointmentListToSave: Appointment[] = appointments.filter( obj => !(obj.sharepointPrimaryId));
+        if(appointmentListToSave.length>0){
+            AppointmentService.batchSaveAppointments(meetingId, appointmentListToSave);
+        }
+    }
+
+    private _saveInvitedUsers(meetingId:number, userList:User[]){
+        let userListToUpdate: User[] = userList.filter( obj => obj.sharepointId);
+        if(userListToUpdate.length>0){
+            UserService.batchUpdateInvitedUsers(meetingId, userListToUpdate);
+        }
+        let userListToSave: User[] = userList.filter( obj => !(obj.sharepointId));
+        if(userListToSave.length>0){
+            UserService.batchSaveInvitedUsers(meetingId, userListToSave);
         }
     }
 
@@ -222,11 +244,10 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             MeetingService.updateMeeting(this.state.meeting).then(()=> {
                 AppointmentService.batchDeleteAppointments(this.state.appointmentDeletionList);
                 UserService.batchDeleteInvitedUser(this.state.invitedUserDeletionList);
-                // TODO save updated Appointments
-                // TODO save new Appointments and Users
+                this._saveAppointments(this.state.meeting.sharepointPrimaryId, this.state.appointmentList);
+                this._saveInvitedUsers(this.state.meeting.sharepointPrimaryId, this.state.invitedUserList);
             });
         } catch (error) {
-            console.log('boooom');
             console.log(error);
             alert('saving new Meeting went wrong');
         }
