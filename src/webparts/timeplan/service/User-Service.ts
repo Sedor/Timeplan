@@ -1,4 +1,4 @@
-import { sp, ItemAddResult, PrincipalType, PrincipalSource, PeoplePickerEntity  } from '@pnp/sp';
+import { sp, ItemAddResult, PrincipalType, PrincipalSource, PeoplePickerEntity, Item  } from '@pnp/sp';
 import { User } from '../data/User/User'
 import { CurrentUser } from '@pnp/sp/src/siteusers'; 
 
@@ -10,7 +10,7 @@ export class UserService {
     public static async saveInvitedUser(meetingId:number, user:User){
         console.log('Service.saveInvitedUser()');
         return await sp.web.lists.getByTitle(this.invitedUserList).items.add({
-            Title: meetingId,
+            Title: String(meetingId),
             UserName: user.name,
             UserEmail: user.eMail
         })
@@ -22,7 +22,7 @@ export class UserService {
         let batch = sp.web.createBatch();
         userList.forEach((user:User)=>{
             sp.web.lists.getByTitle(this.invitedUserList).items.inBatch(batch).add({
-                Title: meetingId,
+                Title: String(meetingId),
                 UserName: user.name,
                 UserEmail: user.eMail
             });
@@ -35,7 +35,7 @@ export class UserService {
         let batch = sp.web.createBatch();
         userList.forEach((user:User)=>{
             sp.web.lists.getByTitle(this.invitedUserList).items.inBatch(batch).getById(user.sharepointId).update({
-                Title: meetingId,
+                Title: String(meetingId),
                 UserName: user.name,
                 UserEmail: user.eMail
             })
@@ -60,6 +60,36 @@ export class UserService {
         })
     }
 
+    public static async getUserByEmail(email: string):Promise<User> {
+        return await sp.profiles.clientPeoplePickerResolveUser({
+            AllowEmailAddresses: true,
+            AllUrlZones: true,
+            MaximumEntitySuggestions:7,
+            PrincipalSource: PrincipalSource.UserInfoList,
+            PrincipalType: PrincipalType.User,
+            QueryString: email
+        }).then( (peopleEntity:PeoplePickerEntity) => {
+            console.log(peopleEntity);
+            return new User({
+                name: peopleEntity.DisplayText,
+                eMail: peopleEntity.EntityData.Email
+            });
+        })
+    }
+
+
+    public static async getInvitedUserIdByEmailAndMeetingId(userEmail:string, meetingId:number){
+        console.log('UserService.getInvitedUserIdByEmailAndMeetingId()');
+        return await sp.web.lists.getByTitle(this.invitedUserList).items.filter(`Title eq '${meetingId}' and UserEmail eq '${userEmail}'`).get().then( (user:any[]) =>{
+            if(user.length > 0){
+                return new User({
+                    sharepointId: user[0].ID,
+                    eMail: user[0].UserName,
+                    name: user[0].UserEmail
+                })
+            }
+        });
+    }
 
     public static async getUserSearch(search: string):Promise<User[]> {
         return await sp.profiles.clientPeoplePickerSearchUser({

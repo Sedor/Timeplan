@@ -7,7 +7,7 @@ export interface IUser{
 
 export class User{
 
-    public sharepointId: number;
+    public sharepointId?: number;
     public name: string;
     public eMail: string;
 
@@ -15,6 +15,10 @@ export class User{
         for (let key in obj) {
             this[key] = obj[key];
         }
+    }
+
+    public setSharepointId(invitedUserId: number) {
+        this.sharepointId = invitedUserId;
     }
 
     public getSharepointId():number {

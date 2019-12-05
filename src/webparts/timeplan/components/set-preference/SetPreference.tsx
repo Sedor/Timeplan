@@ -17,6 +17,7 @@ import { Participant } from '../../data/User/Participant';
 import { DistributionNames } from '../../data/Distributions/DistributionNames';
 import { CurrentUser } from '../../../../../node_modules/@pnp/sp/src/siteusers';
 import { DistributionService } from '../../service/Distribution-Service';
+import { UserService } from '../../service/User-Service';
 
 
 const dropDownOption: IDropdownOption[] = [{
@@ -38,10 +39,11 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
       super(props);
       this._appointmentSelection = new Selection();
       this.state = {
-          meeting: new Meeting({title:''}),
+          meeting: new Meeting({}),
           appointmentList: [],
           appointmentColumns: this._setAppointmentColumnNames(),
-          currentUser: new User({})
+          currentUser: new User({}),
+          comboBoxMap: new Map<number,number>()
       }
   }
 
@@ -50,27 +52,41 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
       console.log('in ComponentDidMount');
       if(this.props.location.state !== undefined){
           if(this.props.location.state.selectedMeeting !== undefined){
-              //TODO get Current User from location.histoy
-              let currentUser:User = (this.props.location.state.currentUser as User);
               let meeting:Meeting = (this.props.location.state.selectedMeeting as Meeting);
-              if(meeting.distribution === DistributionNames.FAIRDISTRO){
-                this._activatePriorityMode();
-              }else if (meeting.distribution === DistributionNames.FIFO){
-                this._activateFifoMode();
-              }
-
+              UserService.getInvitedUserIdByEmailAndMeetingId((this.props.location.state.currentUser as User).getEMail(), meeting.sharepointPrimaryId).then((user:User)=>{
+                this.setState({
+                  currentUser: user
+                });
+              });
               AppointmentService.getAppointmentListForMeetingId(meeting.getSharepointPrimaryId()).then(appointmentList =>{
-                let checkBoxDefautlValues:Map<number,boolean> = appointmentList.reduce(
-                  (map: Map<number,boolean>, appointment:Appointment) => {
-                    map.set(appointment.sharepointPrimaryId, false);
-                  return map
-                  }, new Map<number,boolean>());
+                // TODO here load the checkboxDefaultValues
+                
+                if(meeting.distribution === DistributionNames.FAIRDISTRO){
+                  this._activatePriorityMode();
+                  DistributionService.getPriorityMapForAppointmentList(
+                    //TODO maybe race condition
+                    appointmentList.map(appointment => appointment.getSharepointId()), this.state.currentUser.getSharepointId()).then((priomap:Map<number,number>) =>{
+                      console.log('setting prio map ________');
+                      console.log(priomap);
+                      console.log(priomap.size);
+                      this.setState({
+                        appointmentList: this.state.appointmentList.concat([]),
+                        comboBoxMap: priomap
+                      })
+                    })
+                }else if (meeting.distribution === DistributionNames.FIFO){
+                  this._activateFifoMode();
+                  //TODO load appointment chose
+                    this.setState({
+                    checkBoxMap: appointmentList.reduce((map: Map<number,boolean>, appointment:Appointment) => {
+                        map.set(appointment.sharepointPrimaryId, false);
+                        return map
+                      }, new Map<number,boolean>())
+                    })
+                }
                 this.setState({
                   meeting: meeting,
                   appointmentList: appointmentList,
-                  currentUser: currentUser,
-                  comboBoxMap: new Map<number,number>(),
-                  checkBoxMap: checkBoxDefautlValues
                 })
               });
           }
@@ -109,8 +125,8 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
         return <div>
           <Dropdown
             onChanged={this._onDropdownChange}
-            selectedKey={this.state.checkBoxMap.get(item.sharepointPrimaryId) ?
-              String(this.state.checkBoxMap.get(item.sharepointPrimaryId)) : '1'}
+            selectedKey={this.state.comboBoxMap.get(item.sharepointPrimaryId) ?
+              String(this.state.comboBoxMap.get(item.sharepointPrimaryId)) : '1'}
             options={dropDownOption}
           />
         </div>;
@@ -124,8 +140,8 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
   }
 
   private _savePreferences = () => {
-      console.log('would save Preferences');
-      console.log(this.state);
+    console.log('SetPreference._savePreferences()');
+    DistributionService.addPriorityMapForInvitedUserId(this.state.comboBoxMap,this.state.currentUser.getSharepointId());
   }
 
   private _onDropdownChange = (item: IDropdownOption) => {
@@ -149,6 +165,11 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
       checkBoxMap: checkBoxDefautlValues,
       appointmentList: this.state.appointmentList.concat([])
     });
+  }
+
+  private _test = () => {
+    console.log(this.state);
+    console.log(this.state.comboBoxMap.size);
   }
 
 
@@ -205,6 +226,7 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
                   <DefaultButton text='Zurueck' /> 
               </Link>
               <DefaultButton text='Speichern' onClick={this._savePreferences} />
+              <DefaultButton text='Test' onClick={this._test} />
           </div>
       </div >
       );

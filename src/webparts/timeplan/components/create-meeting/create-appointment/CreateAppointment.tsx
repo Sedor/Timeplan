@@ -3,7 +3,6 @@ import styles from './CreateAppointment.module.scss';
 import { ICreateAppointmentProps } from './ICreateAppointmentProps';
 import { ICreateAppointmentState } from './ICreateAppointmentState';
 import { Appointment, IAppointment } from '../../../data/Appointment/Appointment';
-import { Meeting } from '../../../data/Meeting/Meeting';
 import { DefaultButton } from 'office-ui-fabric-react';
 import { TextField} from 'office-ui-fabric-react/lib/TextField';
 import { DatePicker, DayOfWeek, IDatePickerStrings } from 'office-ui-fabric-react/lib/DatePicker';
@@ -114,7 +113,7 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
                 <div className={styles.container}>
                     <h1>Termin Erstellen</h1>
                         <DatePicker
-                            label="Start date"
+                            label="Datum"
                             isRequired={false}
                             allowTextInput={true}
                             disableAutoFocus={false}

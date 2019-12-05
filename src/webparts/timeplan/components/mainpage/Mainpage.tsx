@@ -67,6 +67,10 @@ export class MainPage extends React.Component < any, IMainPageState > {
       });
     }
 
+    private _getState = () => {
+      console.log(this.state);
+    }
+
     private _getSelectedMeeting():Meeting {
       console.log('_getSelectedMeeting');
       if((this.selection.getSelection()[0] as Meeting) === undefined){
@@ -122,12 +126,12 @@ export class MainPage extends React.Component < any, IMainPageState > {
       if(this.state.isSiteAdmin){
         return (
           <span> 
-            <Link to='/CreateMeeting'>
+            <Link to='/veranstaltungErstellen'>
               <DefaultButton text='Neue Veranstaltung' /> 
             </Link>
             {this.state.selectedMeeting !== undefined ? 
             <Link to={{
-                        pathname: '/CreateMeeting',
+                        pathname: '/veranstaltungErstellen',
                         state: {
                           selectedMeeting: this.state.selectedMeeting
                         }
@@ -140,7 +144,7 @@ export class MainPage extends React.Component < any, IMainPageState > {
             }
             {this.state.selectedMeeting !== undefined ? 
             <Link to={{
-                        pathname: '/MeetingStatus',
+                        pathname: '/veranstaltungsStatus',
                         state: {
                           selectedMeeting: this.state.selectedMeeting
                           }
@@ -173,17 +177,18 @@ export class MainPage extends React.Component < any, IMainPageState > {
             {this._renderSiteAdminButtons()}
             {this.state.selectedMeeting !== undefined ? 
               <Link to={{
-                pathname: '/SetPreference',
+                pathname: '/Einteilung',
                 state: {
                   selectedMeeting: this.state.selectedMeeting,
                   currentUser: this.state.currentUser
                 }
                 }}>
-                <DefaultButton text='Preference' />
+                <DefaultButton text='Einteilung' />
               </Link>
               :
-              <DefaultButton text='Preference' onClick={this._clickedPreferenceWithoutSelection}/>
+              <DefaultButton text='Einteilung' onClick={this._clickedPreferenceWithoutSelection}/>
             }
+            <DefaultButton text='Test' onClick={this._getState}/>
           </div>
         </div>
       </div>

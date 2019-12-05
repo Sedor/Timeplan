@@ -1,6 +1,5 @@
 import { sp, ItemAddResult, Item, List } from '@pnp/sp';
 import { IAppointment, Appointment } from '../data/Appointment/Appointment'
-import { Meeting } from '../data/Meeting/Meeting'
 
 export class AppointmentService {
 
@@ -37,7 +36,7 @@ export class AppointmentService {
         }
     }
 
-    public static async saveAppointment(meetingId:number, appointment:IAppointment){
+    public static async saveAppointment(meetingId:number, appointment:Appointment){
         console.log('Service.saveAppointment()');
         return await sp.web.lists.getByTitle(this.appointmentListName).items.add({
             Title: String(meetingId),

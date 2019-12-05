@@ -228,6 +228,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _saveInvitedUsers(meetingId:number, userList:User[]){
+        console.log('blllllasdlasdl');
+        console.log(userList);
         let userListToUpdate: User[] = userList.filter( obj => obj.sharepointId);
         if(userListToUpdate.length>0){
             UserService.batchUpdateInvitedUsers(meetingId, userListToUpdate);
@@ -312,6 +314,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         appointmentReference.personCount =  updatedAppointment.personCount;
         this.setState({
             appointmentIsUpdating: false,
+            appointmentList: this.state.appointmentList.concat([])
         });
     }
 
@@ -333,12 +336,19 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
     
     private _addUser = (userList:User[]) => {
-        console.log('_addUser');
-        //TODO check if Unique
+        console.log('CreateMeeting._addUser()');
+        console.log(userList);
+        console.log( this.state.invitedUserList);
         this._closeUserModal();
-        let newUserlist = this.state.invitedUserList.concat(userList);
+        let newUsers:User[] = userList.filter(user => { //TODO test this
+            console.log('HERE');
+            console.log(this.state.invitedUserList.filter(obj => user.getName() === obj.getName()).length);
+            return this.state.invitedUserList.filter(obj => user.getName() === obj.getName()).length === 0;
+        });
+        console.log('newUsers');
+        console.log(newUsers);
         this.setState({
-            invitedUserList: newUserlist,
+            invitedUserList: this.state.invitedUserList.concat(newUsers),
         });
     }
 
@@ -464,7 +474,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     />
                 </div> 
                 <div>
-                    <DefaultButton text='Benutzer hinzufuegen' onClick={this.inviteUser} />
+                    <DefaultButton text='Benutzer Hinzufuegen' onClick={this.inviteUser} />
                     <DefaultButton text='Benutzer Loeschen' onClick={this.deleteInvitedUser} />
                 </div>
                 <div>
@@ -493,8 +503,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
               </DialogFooter>
               </Dialog>
             <Modal
-                titleAriaId={'Test_Title'} // TODO remove
-                subtitleAriaId={'Test_Subtitle'} // TODO remove
                 isOpen={this.state.showUserModal}
                 onDismiss={this._closeUserModal}
                 isBlocking={false}
@@ -505,8 +513,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 />
             </Modal>
             <Modal
-                titleAriaId={'Test_Title'} // TODO remove
-                subtitleAriaId={'Test_Subtitle'} // TODO remove
                 isOpen={this.state.showAppointmentModal}
                 onDismiss={this._closeAppointmentModal}
                 isBlocking={false}

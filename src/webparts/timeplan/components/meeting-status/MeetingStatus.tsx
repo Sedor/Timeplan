@@ -303,6 +303,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         <div className={styles.MeetingStatus} >
             <h1>{this.state.meeting.title}</h1>
             <div>
+              <h2>Verteilte Benutzer</h2>
               <DetailsList
                 items={this.state.appointmentList}
                 columns={this.state.appointmentColumns}
@@ -312,6 +313,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
               />
             </div>
             <div>
+              <h2>Unverteilte Benutzer</h2>
               <DetailsList
               items={this.state.participantsList}
               columns={this.state.unassignedParticipantsColumns}

@@ -11,25 +11,10 @@ export class MeetingService {
 
     static readonly meetingListName:string = 'MeetingList';
 
-    public static async testUpdate(meeting:Meeting){
-        console.log('testUpdate');
-        console.log(meeting);
-        sp.web.lists.getByTitle('test').items.getItemByStringId
-        return await sp.web.lists.getByTitle('test').items.getById(1).update({
-            'Title': 'Another Tit312le',
-            'blub': 'testin31g'
-        }).then(result => {
-            console.log(result);
-        });
-            
-    }
-
-
     public static async getMeetingList():Promise<Meeting[]> {
         console.log('Service.getMeetingList');
         return await sp.web.lists.getByTitle(this.meetingListName).items.get().then((itemsArray: any[]) => {
             return itemsArray.map(element => {
-                console.log(element);
                 return new Meeting({
                     sharepointPrimaryId:element.Id,
                     title:element.Title,
@@ -43,7 +28,6 @@ export class MeetingService {
 
     public static async saveMeeting(meeting:Meeting):Promise<number> {
         console.log('Service.saveMeeting()');
-        console.log(meeting);
         return await sp.web.lists.getByTitle(this.meetingListName).items.add({
             Title: meeting.getTitle(),
             akag: meeting.getDescription(),

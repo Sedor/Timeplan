@@ -51,6 +51,10 @@ export class Appointment {
         return this.appointmentDate.getDate() + '.' + (this.appointmentDate.getMonth() + 1) + '.' + (this.appointmentDate.getFullYear());
     }
 
+    public getSharepointId():number{
+        return this.sharepointPrimaryId;
+    }
+
     public isSlotFree():boolean {
         console.log('isSlotFree()');
         return (this.participants.length+1 <= this.personCount);

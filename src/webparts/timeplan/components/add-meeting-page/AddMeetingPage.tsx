@@ -8,6 +8,8 @@ import { Meeting } from '../../data/Meeting/Meeting';
 import { Appointment } from '../../data/Appointment/Appointment';
 import { AppointmentService } from '../../service/Appointment-Service';
 import { PermissionService } from '../../service/Permission-Service';
+import { ListService } from '../../../../../lib/webparts/timeplan/service/List-Service';
+import { DistributionService } from '../../../../../lib/webparts/timeplan/service/Distribution-Service';
 
 const initialState: IAddMeetingPageState = {
     event: {
@@ -85,12 +87,20 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
         UserService.getUserSearch(null);
     }
 
-    public testUpdate(){
-        MeetingService.testUpdate(new Meeting({
-            sharepointPrimaryId: 42,
-            title: 'JustTesting'
-        }))
+    public testUserResolve(){
+        UserService.getUserByEmail('buri@mail.hs-ulm.de');
+    }
 
+    public testUserResolve2(){
+        UserService.getUserByEmail('camdere@hs-ulm.de');
+    }
+
+    public testCreateList(){
+        ListService.createList();
+    }
+    
+    public TestGetPrio(){
+        DistributionService.getPriorityMapForAppointmentList([35,34], 3);
     }
 
     public render(): React.ReactElement<IAddMeetingPageProps> {
@@ -125,8 +135,18 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
                 <button onClick={this.getCurrentUser}>Get CurrentUser</button>
             </div>
             <div>
-                <button onClick={this.testUpdate}>TestUpdate</button>
+                <button onClick={this.testUserResolve}>Get buri@hs-ulm.de User</button>
             </div>
+            <div>
+                <button onClick={this.testUserResolve2}>Get camdere@hs-ulm.de User</button>
+            </div>
+            <div>
+                <button onClick={this.testCreateList}>Create TestList</button>
+            </div>
+            <div>
+                <button onClick={this.TestGetPrio}>Test Get Prio for UserID 3</button>
+            </div>
+            
         </div >
         );
     }
