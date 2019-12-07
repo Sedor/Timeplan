@@ -17,8 +17,12 @@ export class Distribution{
         }
     }
 
-    getDescription(){
+    getDescription():string {
         return this.distributionDescription;
+    }
+
+    getDistributionName():DistributionNames {
+        return this.distributionName;
     }
 
 }

@@ -1,7 +1,7 @@
-import { IDistribution } from './Distribution';
-import { DistributionNames } from './DistributionNames';
+import { IDistribution } from '../Distribution';
+import { DistributionNames } from '../DistributionNames';
 
-export class ManualDistribution implements IDistribution {
+export class ManuelDistribution implements IDistribution {
 
     distributionName: DistributionNames;
     distributionDescription?: string;

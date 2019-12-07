@@ -1,9 +1,10 @@
 import { DistributionNames } from "../data/Distributions/DistributionNames";
-import { Fifo } from "../data/Distributions/Fifo";
-import { FairDistribution } from "../data/Distributions/FairDistribution";
-import { ManualDistribution } from "../data/Distributions/ManualDistribution";
+import { Fifo } from "../data/Distributions/Fifo/Fifo";
+import { FairDistribution } from "../data/Distributions/FairDistribution/FairDistribution";
+import { ManuelDistribution } from "../data/Distributions/ManuelDistribution/ManuelDistribution";
 
 import { sp, ItemAddResult} from "@pnp/sp";
+import { Priority } from "../data/Distributions/FairDistribution/Priority";
 
 export class DistributionService {
 
@@ -20,7 +21,7 @@ export class DistributionService {
         return new FairDistribution().getDistributionDescription();
       }
       case DistributionNames.MANUEL: {
-        return new ManualDistribution().getDistributionDescription();
+        return new ManuelDistribution().getDistributionDescription();
       }
       default: {
         return "There was no Description for this DistributionType";
@@ -28,47 +29,58 @@ export class DistributionService {
     }
   }
 
-  // PriorityList
-  // foreignUserId
-  // foreignAppointmentId
-  // priority
-
-  //TODO this works maybe
-  //TODO needs handling
-  //TODO maybe use Promise.all
   public static async getPriorityMapForAppointmentList(appointmantIdList: number[], userId: number) {
     console.log("DistributionService.getPriorityMapForAppointmentList()");
-    let prioMap: Map<number, number> = new Map<number, number>();
-    await appointmantIdList.forEach((appointmantID: number) => {
-      console.log(`UserId ${userId}, AppointmentID ${appointmantID}`);
-      sp.web.lists.getByTitle(this.priorityListName).items.filter( 
-          `foreignUserId eq ${userId} and foreignAppointmentId eq ${appointmantID}`
-        ).get().then((prio:any) => {
-          console.log(prio);
+    let promiseArray: Promise<Priority>[] = appointmantIdList.map((appointmentId: number) => {  
+      return sp.web.lists.getByTitle(this.priorityListName).items
+        .filter(`foreignUserId eq ${userId} and foreignAppointmentId eq ${appointmentId}`)
+        .get().then((prio:any) => {
           if(prio.length>0){
-            console.log(`UserId ${userId}, AppointmentID ${appointmantID} there prio ${prio[0].priority}`);
-            prioMap.set(appointmantID, prio[0].priority);
+            return new Priority({
+              sharepointId: prio[0].Id,
+              invitedUserSharepointId: userId,
+              appointmentSharePointId: appointmentId,
+              priorityNumber: prio[0].priority
+            });
+          }else {
+            return new Priority({
+              invitedUserSharepointId: userId,
+              appointmentSharePointId: appointmentId,
+              priorityNumber: 1
+            });
           }
-        });
+      });
     });
-    console.log('returning prioMap');
-    console.log(prioMap);
-    return prioMap;
+    return await Promise.all(promiseArray);
   }
 
 
-  //TODO needs Test
-  public static async addPriorityMapForInvitedUserId(prioMap: Map<number, number>, invitedUserId:number) {
-    console.log("DistributionService.addPriorityMapForUserId()");
+  public static async updatePriorityListForInvitedUserId(prioList: Priority[]) {
+    console.log('DistributionService.updatePriorityListForInvitedUserId');
+    console.log(prioList);
     let batch = sp.web.createBatch();
-    prioMap.forEach((value: number, key: number) => {
+    prioList.forEach(prio => {
+      sp.web.lists.getByTitle(this.priorityListName).items.inBatch(batch).getById(prio.getSharepointId()).update({
+        foreignUserId: prio.getInvitedUserSharepointid(),
+        foreignAppointmentId: prio.getAppointmentSharePointId(),
+        priority: prio.getPriorityNumber()
+      })
+    });
+    return await batch.execute();
+  }
+
+  //working
+  public static async addPriorityListForInvitedUserId(prioList: Priority[]) {
+    console.log('DistributionService.addPriorityListForInvitedUserId()');
+    let batch = sp.web.createBatch();
+    prioList.forEach(prio => {
         sp.web.lists
           .getByTitle(this.priorityListName)
           .items.inBatch(batch)
           .add({
-              foreignUserId: invitedUserId,
-              foreignAppointmentId: key,
-              priority: value
+              foreignUserId: prio.getInvitedUserSharepointid(),
+              foreignAppointmentId: prio.getAppointmentSharePointId(),
+              priority: prio.getPriorityNumber()
           });
     });
     return await batch.execute();

@@ -1,5 +1,5 @@
-import { IDistribution } from './Distribution';
-import { DistributionNames } from './DistributionNames';
+import { IDistribution } from '../Distribution';
+import { DistributionNames } from '../DistributionNames';
 
 export class Fifo implements IDistribution {
 
