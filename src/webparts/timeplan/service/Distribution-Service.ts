@@ -3,13 +3,14 @@ import { Fifo } from "../data/Distributions/Fifo/Fifo";
 import { FairDistribution } from "../data/Distributions/FairDistribution/FairDistribution";
 import { ManuelDistribution } from "../data/Distributions/ManuelDistribution/ManuelDistribution";
 
-import { sp, ItemAddResult} from "@pnp/sp";
+import { sp, ItemAddResult , ItemUpdateResult} from "@pnp/sp";
 import { Priority } from "../data/Distributions/FairDistribution/Priority";
+import { Choice } from "../data/Distributions/Choise";
 
 export class DistributionService {
 
   static readonly priorityListName: string = "PriorityList";
-  static readonly chosenAppointmentListName: string = "ChosenAppointmentList";
+  static readonly invitedUserChoiseListName: string = "ChoiceList";
 
 
   public static getDistributionDescription(distributionName: DistributionNames): string {
@@ -84,14 +85,39 @@ export class DistributionService {
           });
     });
     return await batch.execute();
-   }
+  }
 
-   //TODO needs Test
-  public static async addChoiseOfInvitedUser(chosenAppointmentId:number, invitedUserId:number):Promise<ItemAddResult> {
-    console.log("DistributionService.addChoiseOfInvitedUser()");
-    return await sp.web.lists.getByTitle(this.chosenAppointmentListName).items.add({
-          foreignInvitedUserId: invitedUserId,
-          foreignAppointmentId: chosenAppointmentId
+  public static async getChoiseOfInvitedUser(userId:number):Promise<Choice>{
+    console.log('DistributionService.addChoiseOfInvitedUser()');
+    return await sp.web.lists.getByTitle(this.invitedUserChoiseListName).items.filter(``).get().then(choice => {
+      if(choice.length === 1){
+        return new Choice({
+          sharepointId: choice[0].Id,
+          appointmentSharepointId: choice[0].foreignAppointmentId,
+          invitedUserSharepointId:  choice[0].foreignInvitedUserId
+        });
+      }
+      return undefined;
+    });
+  }
+
+  public static async updateChoiseOfInvitedUser(choice:Choice){
+    console.log('DistributionService.updateChoiseOfInvitedUser()');
+    //TODO also Check for uniquenes
+    //TODO check if i can set the new 
+    return await sp.web.lists.getByTitle(this.invitedUserChoiseListName).items.getById(choice.getSharepointId()).update({
+      foreignInvitedUserId: choice.getInvitedUserSharepointId(),
+      foreignAppointmentId: choice.getAppointmentSharepointId()
+    });
+  }
+
+  public static async addChoiseOfInvitedUser(choice:Choice):Promise<ItemAddResult> {
+    console.log('DistributionService.addChoiseOfInvitedUser()');
+    //TODO check here for uniquenes
+    //TODO check if i can set the new 
+    return await sp.web.lists.getByTitle(this.invitedUserChoiseListName).items.add({
+          foreignInvitedUserId: choice.getInvitedUserSharepointId(),
+          foreignAppointmentId: choice.getAppointmentSharepointId()
     });
   }
 

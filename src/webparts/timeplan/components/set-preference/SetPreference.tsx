@@ -13,11 +13,11 @@ import { Checkbox } from 'office-ui-fabric-react/lib/Checkbox';
 import { DefaultButton } from 'office-ui-fabric-react';
 import { DetailsList, Selection, IColumn, CheckboxVisibility} from 'office-ui-fabric-react/lib/DetailsList';
 import { Link } from 'react-router-dom';
-import { Participant } from '../../data/User/Participant';
 import { DistributionNames } from '../../data/Distributions/DistributionNames';
 import { DistributionService } from '../../service/Distribution-Service';
 import { UserService } from '../../service/User-Service';
 import { Priority } from '../../data/Distributions/FairDistribution/Priority';
+import { Choice } from '../../data/Distributions/Choise';
 
 
 const dropDownOption: IDropdownOption[] = [{
@@ -44,7 +44,7 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
           priorityList: [],
           appointmentColumns: this._setAppointmentColumnNames(),
           currentUser: new User({}),
-          comboBoxMap: new Map<number,number>()
+          choice: new Choice({})
       }
   }
 
@@ -52,14 +52,33 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
     DistributionService.getPriorityMapForAppointmentList(
       appointmentList.map(appointment => appointment.getSharepointId()), 
       user.getSharepointId()).then((prioList:Priority[]) => {
-        console.log('setting prio map ___BLUB_____');
-        console.log(prioList);
-        console.log(prioList.length);
         this.setState({
           appointmentList: this.state.appointmentList.concat([]), //just to rerender the list
           priorityList: prioList
         })
       })
+  }
+
+  private _loadChoice = (user:User) => {
+  // choice: new Choice({
+  //   invitedUserSharepointId: user.getSharepointId()
+  // }),
+    DistributionService.getChoiseOfInvitedUser(user.getSharepointId()).then( (choice:Choice) => {
+      if(choice === undefined){
+        this.setState({
+          choice: new Choice({
+            invitedUserSharepointId: user.getSharepointId()
+          }),
+          appointmentList: this.state.appointmentList.concat([])
+        });
+
+      }else{
+        this.setState({
+          choice: choice,
+          appointmentList: this.state.appointmentList.concat([])
+        });
+      }
+    })
   }
 
   componentDidMount(){
@@ -70,21 +89,16 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
         let meeting:Meeting = (this.props.location.state.selectedMeeting as Meeting);
         UserService.getInvitedUserIdByEmailAndMeetingId((this.props.location.state.currentUser as User).getEMail(), meeting.sharepointPrimaryId).then((user:User)=>{
           AppointmentService.getAppointmentListForMeetingId(meeting.getSharepointPrimaryId()).then(appointmentList =>{
-            
             if(meeting.distribution === DistributionNames.FAIRDISTRO){
               this._activatePriorityMode();
               this._loadPriorityList(appointmentList,user);
               
             }else if (meeting.distribution === DistributionNames.FIFO){
               this._activateFifoMode();
+              this._loadChoice(user);
               //TODO load appointment chose
-                this.setState({
-                checkBoxMap: appointmentList.reduce((map: Map<number,boolean>, appointment:Appointment) => {
-                    map.set(appointment.sharepointPrimaryId, false);
-                    return map
-                  }, new Map<number,boolean>())
-                })
             }
+
             this.setState({
               meeting: meeting,
               appointmentList: appointmentList,
@@ -105,7 +119,7 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
       onRender: (item: Appointment) => {
         return <div>
           <Checkbox
-            checked={this.state.checkBoxMap.get(item.sharepointPrimaryId)}
+            checked={this.state.choice.getAppointmentSharepointId() === item.getSharepointId()}
             onChange={this._onClickedCheckbox}
           />
         </div>;
@@ -151,11 +165,16 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
       }
     }else if (this.state.meeting.distribution === DistributionNames.FIFO){
       console.log('would save auswahl');
+      if(this.state.choice.getSharepointId() === undefined){
+        DistributionService.addChoiseOfInvitedUser(this.state.choice);
+      } else {
+        DistributionService.updateChoiseOfInvitedUser(this.state.choice);
+      }
     }
   }
 
   private _onDropdownChange = (item: IDropdownOption) => {
-    console.log('_onDropdownChange()');
+    console.log('SetPreference._onDropdownChange()');
     let selectedAppointment = (this._appointmentSelection.getSelection()[0] as Appointment)
     this.state.priorityList[this.state.appointmentList.indexOf(selectedAppointment)].setPriorityNumber( parseInt(item.text));
     this.setState({
@@ -169,21 +188,18 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
 
   private _onClickedCheckbox = (ev: React.FormEvent<HTMLElement>, checked: boolean) => {
     console.log('SetPreference._onClickedCheckbox()');
-    let checkBoxDefautlValues:Map<number,boolean> = this.state.appointmentList.reduce(
-      (map: Map<number,boolean>, appointment:Appointment) => {
-        map.set(appointment.sharepointPrimaryId, false);
-      return map
-      }, new Map<number,boolean>());
-      checkBoxDefautlValues.set((this._appointmentSelection.getSelection()[0] as Appointment).sharepointPrimaryId, true);
-    this.setState({
-      checkBoxMap: checkBoxDefautlValues,
-      appointmentList: this.state.appointmentList.concat([])
-    });
+    if(checked){
+      let tmpChoice = this.state.choice; 
+      tmpChoice.setAppointmentSharepointId((this._appointmentSelection.getSelection()[0] as Appointment).sharepointPrimaryId)
+      this.setState({
+        choice: tmpChoice,
+        appointmentList: this.state.appointmentList.concat([])
+      });
+    }
   }
 
   private _test = () => {
     console.log(this.state);
-    console.log(this.state.comboBoxMap.size);
   }
 
 
