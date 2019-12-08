@@ -36,6 +36,10 @@ export class Meeting{
         this.description = description;
     }
 
+    public setStatus(status:MeetingStatus){
+        this.status = status;
+    }
+
     public getSharepointPrimaryId():number {
         return this.sharepointPrimaryId;
     }
@@ -48,5 +52,8 @@ export class Meeting{
         return this.description;
     }
 
+    public getStatus():MeetingStatus {
+        return this.status;
+    }
 
 }

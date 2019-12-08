@@ -30,22 +30,16 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     constructor(props: any){
         super(props);
-       
         console.log('CreateMeeting.Constructor()');
-        console.log('state is:');
-        console.log(this.state);
         this.state = {
             userColumns: this._setUserColumnNames(),
             appointmentColumns: this._setAppointmentColumnNames(),
             isUpdate: false,
-            meeting: new Meeting({
-                title: ''
-            }),
+            meeting: new Meeting({}),
             appointmentList: [],
             appointmentDeletionList: [],
             invitedUserList: [],
             invitedUserDeletionList: [],
-            clearance: false,
             appointmentIsUpdating: false,
         };
         this._generatedDropdownOptions = this._generateDistributionDropdownOptions();
@@ -87,8 +81,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
                 this.setState({
                     meeting: meetingToUpgrade,
-                    isUpdate: true,
-                    clearance: (meetingToUpgrade.status === MeetingStatus.OPEN),
+                    isUpdate: true
                 });
                 AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.getSharepointPrimaryId()).then((appointmentList:Appointment[]) =>{
                     this.setState({
@@ -228,8 +221,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _saveInvitedUsers(meetingId:number, userList:User[]){
-        console.log('blllllasdlasdl');
-        console.log(userList);
         let userListToUpdate: User[] = userList.filter( obj => obj.sharepointId);
         if(userListToUpdate.length>0){
             UserService.batchUpdateInvitedUsers(meetingId, userListToUpdate);
@@ -251,15 +242,19 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             });
         } catch (error) {
             console.log(error);
-            alert('saving new Meeting went wrong');
         }
     }
 
     private _onReleaseChange = (checked: boolean):void => {
-        console.log('_onReleaseChange:');
-        this.setState({
-            clearance: checked
-        });
+      console.log('_onReleaseChange:');
+      if(checked){
+        this.state.meeting.setStatus(MeetingStatus.OPEN);
+      } else {
+        this.state.meeting.setStatus(MeetingStatus.CREATED);
+      }
+      this.setState({
+        meeting: this.state.meeting
+      });
     }
 
     private _onMeetingNameChange = (meetingName:string) => {
@@ -337,16 +332,10 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     
     private _addUser = (userList:User[]) => {
         console.log('CreateMeeting._addUser()');
-        console.log(userList);
-        console.log( this.state.invitedUserList);
         this._closeUserModal();
-        let newUsers:User[] = userList.filter(user => { //TODO test this
-            console.log('HERE');
-            console.log(this.state.invitedUserList.filter(obj => user.getName() === obj.getName()).length);
+        let newUsers:User[] = userList.filter(user => {
             return this.state.invitedUserList.filter(obj => user.getName() === obj.getName()).length === 0;
         });
-        console.log('newUsers');
-        console.log(newUsers);
         this.setState({
             invitedUserList: this.state.invitedUserList.concat(newUsers),
         });
@@ -364,6 +353,10 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
             }
         }
         return dropdownOptions;
+    }
+
+    private _test = () => {
+        console.log(this.state);
     }
 
     private _setAppointmentColumnNames = ():IColumn[] => {
@@ -478,7 +471,13 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     <DefaultButton text='Benutzer Loeschen' onClick={this.deleteInvitedUser} />
                 </div>
                 <div>
-                    <Toggle label="Veranstaltung freigeben?" onText="Ja" offText="Nein" onChanged={this._onReleaseChange} />
+                    <Toggle 
+                      label="Veranstaltung freigeben?" 
+                      onText="Ja" 
+                      offText="Nein"
+                      checked= { this.state.meeting.getStatus() === MeetingStatus.OPEN }
+                      onChanged={this._onReleaseChange} 
+                    />
                 </div>
                 <div>
                     <DefaultButton text='Speichern' onClick={this._saveMeeting} />
@@ -488,6 +487,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     {this.state.isUpdate ? 
                     <DefaultButton text='Loeschen' onClick={this._deleteMeetingButton} />
                     : null}
+                    <DefaultButton text='Test' onClick={this._test} />
                 </div>
             </div>
             <Dialog

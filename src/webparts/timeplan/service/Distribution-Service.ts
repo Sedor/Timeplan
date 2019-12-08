@@ -6,6 +6,7 @@ import { ManuelDistribution } from "../data/Distributions/ManuelDistribution/Man
 import { sp, ItemAddResult , ItemUpdateResult} from "@pnp/sp";
 import { Priority } from "../data/Distributions/FairDistribution/Priority";
 import { Choice } from "../data/Distributions/Choise";
+import { User } from "../data/User/User";
 
 export class DistributionService {
 
@@ -30,7 +31,7 @@ export class DistributionService {
     }
   }
 
-  public static async getPriorityMapForAppointmentList(appointmantIdList: number[], userId: number) {
+  public static async getPriorityListForAppointmentList(appointmantIdList: number[], userId: number) {
     console.log("DistributionService.getPriorityMapForAppointmentList()");
     let promiseArray: Promise<Priority>[] = appointmantIdList.map((appointmentId: number) => {  
       return sp.web.lists.getByTitle(this.priorityListName).items
@@ -87,9 +88,28 @@ export class DistributionService {
     return await batch.execute();
   }
 
-  public static async getChoiseOfInvitedUser(userId:number):Promise<Choice>{
+
+  public static async getChoiceListOfInvitedUserList(userList:User[]):Promise<Choice[]>{
+    console.log('DistributionService.getChoiceOfInvitedUserList()');
+    let promiseList:Promise<Choice>[] = userList.map((user:User) => {
+      return sp.web.lists
+        .getByTitle(this.invitedUserChoiseListName)
+        .items.filter(`foreignInvitedUserId eq ${user.getSharepointId()}`).get().then( choice => {
+          if(choice.length > 0){
+            return new Choice({
+              sharepointId: choice[0].Id,
+              appointmentSharepointId: choice[0].foreignAppointmentId,
+              invitedUserSharepointId:  choice[0].foreignInvitedUserId
+            });
+          }
+        })
+    });
+    return await Promise.all(promiseList);
+  }
+
+  public static async getChoiceOfInvitedUser(userId:number):Promise<Choice>{
     console.log('DistributionService.addChoiseOfInvitedUser()');
-    return await sp.web.lists.getByTitle(this.invitedUserChoiseListName).items.filter(``).get().then(choice => {
+    return await sp.web.lists.getByTitle(this.invitedUserChoiseListName).items.filter(`foreignInvitedUserId eq ${userId}`).get().then(choice => {
       if(choice.length === 1){
         return new Choice({
           sharepointId: choice[0].Id,
@@ -101,7 +121,7 @@ export class DistributionService {
     });
   }
 
-  public static async updateChoiseOfInvitedUser(choice:Choice){
+  public static async updateChoiceOfInvitedUser(choice:Choice){
     console.log('DistributionService.updateChoiseOfInvitedUser()');
     //TODO also Check for uniquenes
     //TODO check if i can set the new 
@@ -111,7 +131,7 @@ export class DistributionService {
     });
   }
 
-  public static async addChoiseOfInvitedUser(choice:Choice):Promise<ItemAddResult> {
+  public static async addChoiceOfInvitedUser(choice:Choice):Promise<ItemAddResult> {
     console.log('DistributionService.addChoiseOfInvitedUser()');
     //TODO check here for uniquenes
     //TODO check if i can set the new 

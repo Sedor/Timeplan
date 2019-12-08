@@ -1,4 +1,4 @@
-import { Participant } from '../User/Participant'
+import { User } from '../User/User'
 
 export interface IAppointment{    
     appointmentDate?: Date,
@@ -6,7 +6,7 @@ export interface IAppointment{
     appointmentEnd?: string,
     personCount?: number,
     sharepointPrimaryId?: number,
-    participants?: Participant[],
+    participants?: User[],
 }
 
 export class Appointment {
@@ -17,7 +17,7 @@ export class Appointment {
     appointmentStart: string;
     appointmentEnd: string;
     personCount: number;
-    participants: Participant[] = [];
+    participants: User[] = [];
 
     private _WeekdaysGerman = [
         'Sonntag',
@@ -60,17 +60,21 @@ export class Appointment {
         return (this.participants.length+1 <= this.personCount);
     }
 
-    public addParticipant(participant:Participant){
+    public addParticipant(invitedUser:User){
         if(this.participants){
-            this.participants = this.participants.concat(participant);
+            this.participants = this.participants.concat(invitedUser);
         }else{
-            this.participants = [participant];
+            this.participants = [invitedUser];
         }
     }
 
-    public removeParticipantByReference(participant:Participant){
+    public getParticipant():User[]{
+        return this.participants
+    }
+
+    public removeParticipantByReference(userToRemove:User){
         console.log('Appointments.removeParticipantByReference()');
-        this.participants = this.participants.filter(obj => obj !== participant);
+        this.participants = this.participants.filter((user:User) => user.getSharepointId() !== userToRemove.getSharepointId());
     }
 
 }

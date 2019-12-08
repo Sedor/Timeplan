@@ -49,7 +49,7 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
   }
 
   private _loadPriorityList = (appointmentList:Appointment[], user:User) => {
-    DistributionService.getPriorityMapForAppointmentList(
+    DistributionService.getPriorityListForAppointmentList(
       appointmentList.map(appointment => appointment.getSharepointId()), 
       user.getSharepointId()).then((prioList:Priority[]) => {
         this.setState({
@@ -63,7 +63,7 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
   // choice: new Choice({
   //   invitedUserSharepointId: user.getSharepointId()
   // }),
-    DistributionService.getChoiseOfInvitedUser(user.getSharepointId()).then( (choice:Choice) => {
+    DistributionService.getChoiceOfInvitedUser(user.getSharepointId()).then( (choice:Choice) => {
       if(choice === undefined){
         this.setState({
           choice: new Choice({
@@ -166,9 +166,9 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
     }else if (this.state.meeting.distribution === DistributionNames.FIFO){
       console.log('would save auswahl');
       if(this.state.choice.getSharepointId() === undefined){
-        DistributionService.addChoiseOfInvitedUser(this.state.choice);
+        DistributionService.addChoiceOfInvitedUser(this.state.choice);
       } else {
-        DistributionService.updateChoiseOfInvitedUser(this.state.choice);
+        DistributionService.updateChoiceOfInvitedUser(this.state.choice);
       }
     }
   }

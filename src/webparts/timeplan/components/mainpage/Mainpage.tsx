@@ -7,7 +7,7 @@ import { User } from '../../data/User/User';
 import { MeetingService } from '../../service/Meeting-Service';
 import { Link } from 'react-router-dom';
 import { DefaultButton } from 'office-ui-fabric-react';
-import { DetailsList, Selection, IColumn, SelectionMode, CheckboxVisibility} from 'office-ui-fabric-react/lib/DetailsList';
+import { DetailsList, Selection, IColumn, CheckboxVisibility, ColumnActionsMode} from 'office-ui-fabric-react/lib/DetailsList';
 import { UserService } from '../../service/User-Service';
 
 export class MainPage extends React.Component < any, IMainPageState > {

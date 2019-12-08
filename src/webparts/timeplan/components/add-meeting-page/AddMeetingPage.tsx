@@ -10,6 +10,7 @@ import { AppointmentService } from '../../service/Appointment-Service';
 import { PermissionService } from '../../service/Permission-Service';
 import { ListService } from '../../../../../lib/webparts/timeplan/service/List-Service';
 import { DistributionService } from '../../../../../lib/webparts/timeplan/service/Distribution-Service';
+import { User } from '../../data/User/User';
 
 const initialState: IAddMeetingPageState = {
     event: {
@@ -100,7 +101,13 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
     }
     
     public TestGetPrio(){
-        DistributionService.getPriorityMapForAppointmentList([35,34], 3);
+        DistributionService.getPriorityListForAppointmentList([35,34], 3);
+    }
+
+    public testBatchGetChoice(){
+        console.log('look here');
+        console.log(DistributionService.getChoiceListOfInvitedUserList([new User({sharepointId: 86}),new User({sharepointId: 87}) ]));
+
     }
 
     public render(): React.ReactElement<IAddMeetingPageProps> {
@@ -146,7 +153,9 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
             <div>
                 <button onClick={this.TestGetPrio}>Test Get Prio for UserID 3</button>
             </div>
-            
+            <div>
+                <button onClick={this.testBatchGetChoice}>Test batch get userChoice</button>
+            </div>
         </div >
         );
     }

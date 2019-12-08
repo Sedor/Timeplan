@@ -7,55 +7,50 @@ import { Meeting } from '../../data/Meeting/Meeting';
 import { Appointment } from '../../data/Appointment/Appointment';
 import { User } from '../../data/User/User';
 import { AppointmentService } from '../../service/Appointment-Service';
-import { Participant } from '../../data/User/Participant'
 import { DefaultButton } from 'office-ui-fabric-react';
-import { DetailsList, Selection, IColumn, SelectionMode, CheckboxVisibility } from 'office-ui-fabric-react/lib/DetailsList';
+import { DetailsList, Selection, IColumn, CheckboxVisibility } from 'office-ui-fabric-react/lib/DetailsList';
 import { Link } from 'react-router-dom';
 import { IDragDropEvents, IDragDropContext } from 'office-ui-fabric-react/lib/utilities/dragdrop';
+import { UserService } from '../../service/User-Service';
+import { DistributionService } from '../../service/Distribution-Service';
+import { Choice } from '../../data/Distributions/Choise';
 
 export class MeetingStatus extends React.Component < any, IMeetingStatusState > {
 
     private _appointmentSelection: Selection;
-    private _unassignedParticipantSelection: Selection;
-    private _assignedParticipantsSelection: Selection; //TODO check this up 
+    private _unassignedInvitedUsersSelection: Selection;
 
     private _dragDropEvents: IDragDropEvents;
-    private _dropDestination: Appointment | Participant;
-    // private _lastSelectedAppointment: Appointment;
+    private _dropDestination: Appointment | User;
 
     constructor(props: any){
         super(props);
 
-        this._unassignedParticipantSelection = new Selection();
-        this._assignedParticipantsSelection = new Selection();
+        this._unassignedInvitedUsersSelection = new Selection();
         this._appointmentSelection = new Selection(); 
-
         this._dragDropEvents = this._getDragDropEvents();
-        // this._draggedIndex = -1;
 
         this.state = {
             meeting: new Meeting({title:''}),
             appointmentList: [],
-            participantsList: this.generateParticipantsList(), //TODO Change to Participant
+            invitedUserList: [],
             appointmentColumns: this._setAppointmentColumnNames(),
-            unassignedParticipantsColumns: this._setUnassignedParticipantColumnNames(),
-            assignedParticipantsColumns: this._setAssignedParticipantColumnNames()
+            unassignedInvitedUsersColumns: this._setUnassignedInvitedUsersColumnNames(),
+            assignedInvitedUsersColumns: this._setAssignedInvitedUsersColumnNames()
         }
     }
 
     private _getDragDropEvents(): IDragDropEvents {
       return {
         canDrop: (dropContext?: IDragDropContext, dragContext?: IDragDropContext) => {
-          console.log('canDrop()');
           try {
-            return !(dropContext.data as Participant).isAssigned;
+            return !this._isAssigned((dropContext.data as User), this.state.appointmentList);
           } catch (error) {
             console.log(error);
           }
           return true;
         },
         canDrag: (item?: any) => {
-          console.log('canDrag()');
           if (item instanceof Appointment){
             return false; 
           }else {
@@ -66,18 +61,14 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
           return styles.onDropEnter;
         },
         onDragLeave: (item?: any, event?: DragEvent) => {
-          // item is the last visited Element
           return;
         },
         onDrop: (onDropItem?: any, event?: DragEvent) => {
           console.log('onDrop()');
-          // console.log('DropDestination is now:');
           if(onDropItem instanceof Appointment){
-            // console.log(onDropItem);
             this._dropDestination = onDropItem;
-          }else if(onDropItem instanceof Participant){
-            if(!(onDropItem as Participant).isAssigned){
-              // console.log(onDropItem);
+          }else if(onDropItem instanceof User){
+            if(!this._isAssigned((onDropItem as User), this.state.appointmentList)){
               this._dropDestination = onDropItem;
             }            
           }
@@ -88,14 +79,14 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         },
         onDragEnd: (item?: any, event?: DragEvent) => {
           console.log('onDragEnd()');
-          if ((item instanceof Participant) && (this._dropDestination instanceof Appointment)) {
-            if(item.isAssigned){
+          if ((item instanceof User) && (this._dropDestination instanceof Appointment)) {
+            if(this._isAssigned(item, this.state.appointmentList)){
               this._dopFromAppointmentToAppointment(this._dropDestination, item);
             } else {
               this._dropIntoAppointment(this._dropDestination, item);  
             } 
-          } else if ((item instanceof Participant) && (this._dropDestination instanceof Participant)){
-            if(item.isAssigned){
+          } else if ((item instanceof User) && (this._dropDestination instanceof User)){
+            if(this._isAssigned(item, this.state.appointmentList)){
               this._dropIntoUnassignedParticipants(item);
             }
           }
@@ -104,7 +95,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       };
     }
 
-    private _dopFromAppointmentToAppointment = (appointmentToInsertTo:Appointment, participant: Participant) => {
+    private _dopFromAppointmentToAppointment = (appointmentToInsertTo:Appointment, participant: User) => {
       if(appointmentToInsertTo.isSlotFree()){
         this.state.appointmentList.map(appointment => appointment.removeParticipantByReference(participant));
         appointmentToInsertTo.addParticipant(participant);
@@ -116,19 +107,23 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       }
     }
 
-    private _dropIntoUnassignedParticipants = (participant: Participant) => {
+    private _dropIntoUnassignedParticipants = (participant: User) => {
       this.state.appointmentList.map(appointment => appointment.removeParticipantByReference(participant));
-      participant.isAssigned = false;
       this.setState({
         appointmentList: this.state.appointmentList.concat([]),
-        participantsList: this.state.participantsList.concat(participant)
+        invitedUserList: this.state.invitedUserList.concat(participant)
       })
       
     }
 
-    private _dropIntoAppointment = (appointment: Appointment, participant: Participant) => {
+    private _isAssigned = (user:User, appointmentList: Appointment[]) => {
+      return appointmentList.reduce( (isAssigned:boolean, appointment:Appointment) => {
+        return isAssigned || appointment.getParticipant().filter(participant => participant.getSharepointId() === user.getSharepointId()).length === 1;
+      }, false);
+    }
+
+    private _dropIntoAppointment = (appointment: Appointment, participant: User) => {
       if(appointment.isSlotFree()){
-        participant.isAssigned = true;
         appointment.addParticipant(participant);
         this.setState({
           appointmentList: this.state.appointmentList.concat([])
@@ -140,28 +135,26 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
 
     }
 
-    private _removeFromParticipantList(participant:Participant){
+    private _removeFromParticipantList = (userToRemove:User) => {
       this.setState({
-        participantsList: this.state.participantsList.filter(obj => obj !== participant)
+        invitedUserList: this.state.invitedUserList.filter((user:User) => user.getSharepointId() !== userToRemove.getSharepointId())
       });
     }
 
-    //TODO delete this
-    private generateParticipantsList = ():Participant[] => {
-      console.log('MeetingStatus.generateParticipantsList()');
-      let tmpParticipantsList: Participant[] = [];
-      for (let index = 0; index < 13; index++) {
-        tmpParticipantsList = tmpParticipantsList.concat([new Participant({
-          appointmentPriority: new Map(),
-          eMail: 'test@test.com',
-          sharepointId: index,
-          name: `Tester ${String(index)}`,
-          participantId: String(index),
-          isAssigned: false,
-        })]);
-      }
-      console.log(tmpParticipantsList);
-      return tmpParticipantsList;
+    private _preDistributePersons = (appointmentList:Appointment[], invitedUserList:User[], choiceList:Choice[]) => {
+      console.log('MeetingStatus._preDistributePersons()');
+      console.log(choiceList);
+      choiceList.forEach((choice:Choice) => {
+        let appointment = appointmentList.filter( (appointment:Appointment) => appointment.getSharepointId() === choice.getAppointmentSharepointId())[0];
+        let invitedUser = invitedUserList.filter( (user:User) => user.getSharepointId() === choice.getInvitedUserSharepointId())[0];
+        invitedUserList = invitedUserList.filter((user:User) => user.getSharepointId() !== invitedUser.getSharepointId());
+        appointment.addParticipant(invitedUser); 
+      });
+      this.setState({
+        appointmentList: appointmentList,
+        invitedUserList: invitedUserList,
+        choiceList: choiceList
+      });
     }
 
     componentDidMount(){
@@ -169,13 +162,18 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       window.addEventListener("beforeunload", this._handleWindowBeforeUnload);
       if(this.props.location.state !== undefined){
           if(this.props.location.state.selectedMeeting !== undefined){
-              let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
-              AppointmentService.getAppointmentListForMeetingId(meetingToUpgrade.getSharepointPrimaryId()).then(appointmentList =>{
-                  this.setState({
-                      meeting: meetingToUpgrade,
-                      appointmentList: appointmentList,
-                  })
+              let meeting:Meeting = (this.props.location.state.selectedMeeting as Meeting);
+              AppointmentService.getAppointmentListForMeetingId(meeting.getSharepointPrimaryId()).then(appointmentList =>{
+                UserService.getInvitedUserListForMeetingId(meeting.getSharepointPrimaryId()).then(invitedUserList => {
+                  DistributionService.getChoiceListOfInvitedUserList(invitedUserList).then( choiceList => {
+                    choiceList = choiceList.filter( choice => choice !== undefined);
+                    this._preDistributePersons(appointmentList, invitedUserList, choiceList);
+                  });
+                });
               });
+            this.setState({
+              meeting: meeting,
+            });
           }
       }
     }
@@ -250,7 +248,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
             return <DetailsList
             items={item.participants}
             dragDropEvents={this._dragDropEvents}
-            columns={this.state.assignedParticipantsColumns}
+            columns={this.state.assignedInvitedUsersColumns}
             checkboxVisibility={CheckboxVisibility.hidden}
           />;
           } else {
@@ -263,7 +261,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       return columns;
     }
 
-    private _setUnassignedParticipantColumnNames = ():IColumn[] => {
+    private _setUnassignedInvitedUsersColumnNames = ():IColumn[] => {
       let columns:IColumn[] = [{
         key: 'column1',
         name: 'Eingeladener Benutzer',
@@ -280,7 +278,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       return columns;
     }
 
-    private _setAssignedParticipantColumnNames = ():IColumn[] =>{
+    private _setAssignedInvitedUsersColumnNames = ():IColumn[] =>{
       let columns:IColumn[] = [{
         key: 'column1',
         name: 'Benutzername',
@@ -297,6 +295,10 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       return columns;
     }
     
+
+    public test = () => {
+      console.log(this.state);
+    }
 
     public render(): React.ReactElement<IMeetingStatusProps> {
         return(
@@ -315,9 +317,9 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
             <div>
               <h2>Unverteilte Benutzer</h2>
               <DetailsList
-              items={this.state.participantsList}
-              columns={this.state.unassignedParticipantsColumns}
-              selection={this._unassignedParticipantSelection}
+              items={this.state.invitedUserList}
+              columns={this.state.unassignedInvitedUsersColumns}
+              selection={this._unassignedInvitedUsersSelection}
               dragDropEvents={this._dragDropEvents}
               checkboxVisibility={CheckboxVisibility.hidden}
               />
@@ -330,7 +332,11 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
                     <DefaultButton text='Zurueck' /> 
                 </Link>
                 <DefaultButton text='Speichern' onClick={this._saveDistribution}/>
+                <DefaultButton text='Test' onClick={this.test}/>
             </div>
+            
+              
+            
         </div >
         );
     }

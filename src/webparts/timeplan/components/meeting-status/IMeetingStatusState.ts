@@ -2,12 +2,14 @@ import { Meeting } from '../../data/Meeting/Meeting';
 import { Appointment } from '../../data/Appointment/Appointment';
 import { User } from '../../data/User/User';
 import { IColumn } from 'office-ui-fabric-react/lib/DetailsList';
+import { Choice } from '../../data/Distributions/Choise';
 
 export interface IMeetingStatusState{
     meeting?: Meeting,
     appointmentList?: Appointment[],
-    participantsList?: User[], //TODO Change to Participant
+    invitedUserList?: User[],
+    choiceList?: Choice[]
     appointmentColumns?:IColumn[],
-    unassignedParticipantsColumns?:IColumn[],
-    assignedParticipantsColumns?:IColumn[],
+    unassignedInvitedUsersColumns?:IColumn[],
+    assignedInvitedUsersColumns?:IColumn[],
 }
