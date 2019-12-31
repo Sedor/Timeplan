@@ -33,9 +33,9 @@ export class DistributionService {
     }
   }
 
-  public static async getPriorityListForUserList(userList:User[]){
+  public static async getPriorityListForUserList(userList:User[]):Promise<any[]>{
     console.log('DistributionService.getPriorityListForAppointmentList()');
-    let promiseArray: Promise<Priority>[] = userList.map((user: User) => {  
+    let promiseArray = userList.map((user: User) => {  
       return sp.web.lists.getByTitle(this.priorityListName).items
         .filter(`foreignUserId eq ${user.getSharepointId()}`)
         .get().then((prioList:any) => {
@@ -138,7 +138,7 @@ export class DistributionService {
   }
 
   // DistributionService.distribute(this.state.meeting, this.state.invitedUserList, this.state.appointmentList, this.state.priorityList);
-  public static distribute(distributionAlgo: IDistribution, invitedUserList:User[], appointmentList:Appointment[], priorityList:Priority[]){   
+  public static distribute(distributionAlgo: IDistribution, invitedUserList:User[], appointmentList:Appointment[], priorityList:[Priority[]]){   
     return distributionAlgo.distribute(invitedUserList, appointmentList, priorityList)
   }
 

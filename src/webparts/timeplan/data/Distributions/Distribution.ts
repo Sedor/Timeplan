@@ -7,7 +7,7 @@ import { Priority } from './FairDistribution/Priority';
 export interface IDistribution{
     distributionName: DistributionNames,
     distributionDescription?: string,
-    distribute: (userList:User[] , AppointmentList:Appointment[], PriorityList:Priority[]) => Choice[]
+    distribute: (userList:User[] , AppointmentList:Appointment[], PriorityList:[Priority[]]) => Choice[]
 }
 
 export class Distribution{

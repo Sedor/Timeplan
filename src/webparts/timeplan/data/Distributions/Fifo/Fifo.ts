@@ -6,13 +6,7 @@ import { Priority } from '../FairDistribution/Priority';
 
 export class Fifo implements IDistribution {
 
-    distribute = (userList:User[] , appointmentList:Appointment[], priorityList:Priority[]) => {
-        console.log('loook here mum');
-        console.log(userList);
-        console.log(appointmentList);
-        console.log(priorityList);
-
-
+    distribute = (userList:User[] , appointmentList:Appointment[], priorityList:[Priority[]]) => {
         return undefined;
     };
     distributionName: DistributionNames;

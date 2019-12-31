@@ -14,13 +14,7 @@ export class ManuelDistribution implements IDistribution {
         this.distributionDescription = "This is Manuel Distribution" 
     }
     
-    distribute = (userList:User[] , appointmentList:Appointment[], priorityList:Priority[]) => {
-        console.log('loook here mum');
-        console.log(userList);
-        console.log(appointmentList);
-        console.log(priorityList);
-
-
+    distribute = (userList:User[] , appointmentList:Appointment[], priorityList:[Priority[]]) => {
         return undefined;
     };
  

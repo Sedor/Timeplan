@@ -11,7 +11,7 @@ export interface IMeetingStatusState{
     allUsers?: User[],
     invitedUserList?: User[],
     choiceList?: Choice[],
-    priorityList?: Priority[],
+    priorityList?: [Priority[]],
     appointmentColumns?:IColumn[],
     unassignedInvitedUsersColumns?:IColumn[],
     assignedInvitedUsersColumns?:IColumn[],

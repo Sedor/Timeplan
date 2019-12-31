@@ -67,10 +67,6 @@ export class MainPage extends React.Component < any, IMainPageState > {
       });
     }
 
-    private _getState = () => {
-      console.log(this.state);
-    }
-
     private _getSelectedMeeting():Meeting {
       console.log('_getSelectedMeeting');
       if((this.selection.getSelection()[0] as Meeting) === undefined){
@@ -188,7 +184,6 @@ export class MainPage extends React.Component < any, IMainPageState > {
               :
               <DefaultButton text='Einteilung' onClick={this._clickedPreferenceWithoutSelection}/>
             }
-            <DefaultButton text='Test' onClick={this._getState}/>
           </div>
         </div>
       </div>

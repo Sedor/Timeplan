@@ -355,10 +355,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
         return dropdownOptions;
     }
 
-    private _test = () => {
-        console.log(this.state);
-    }
-
     private _setAppointmentColumnNames = ():IColumn[] => {
         let columns:IColumn[] = [{
           key: 'column1',
@@ -487,7 +483,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                     {this.state.isUpdate ? 
                     <DefaultButton text='Loeschen' onClick={this._deleteMeetingButton} />
                     : null}
-                    <DefaultButton text='Test' onClick={this._test} />
                 </div>
             </div>
             <Dialog

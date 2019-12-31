@@ -184,7 +184,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
                     choiceList = choiceList.filter( choice => choice !== undefined);
                     this._distributePersons(appointmentList, invitedUserList, choiceList);
                   });
-                  DistributionService.getPriorityListForUserList(invitedUserList).then( (priorityList:Priority[]) => {
+                  DistributionService.getPriorityListForUserList(invitedUserList).then( (priorityList:[Priority[]]) => {
                     this.setState({
                       priorityList: priorityList
                     })
@@ -251,8 +251,10 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
 
     private _distribute = () => {
       console.log('MeetingStatus.verteilen()');
-      // let algo = new FairDistribution();
-      let prioList = DistributionService.distribute(new FairDistribution(), this.state.invitedUserList, this.state.appointmentList, this.state.priorityList);
+      DistributionService.distribute(new FairDistribution(), this.state.invitedUserList, this.state.appointmentList, this.state.priorityList);
+      this.setState({
+        choiceList: this._generateChoiceList()  
+      })
     }
 
     private _setAppointmentColumnNames():IColumn[] {
@@ -361,17 +363,12 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
           reader.onload = () => {
               // this 'text' is the content of the file
               var text = reader.result;
-              console.log('look here');
-              console.log(text);
           }
           reader.readAsText(file);
         }
     }
 
-
-    public test = () => {
-      console.log(this.state);
-    }
+// <DefaultButton> <input type='file' name="Algorithmus Laden" accept='.txt' onChange={this._testing}/> </DefaultButton>
 
     public render(): React.ReactElement<IMeetingStatusProps> {
         return(
@@ -400,7 +397,6 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
             {this.state.distributionButtonVisible ? 
             <div>
               <DefaultButton text='Verteilen' onClick={this._distribute}/>
-              <DefaultButton> <input type='file' name="Algorithmus Laden" accept='.txt' onChange={this._testing}/> </DefaultButton>
             </div>
             :
             <div/>
@@ -410,11 +406,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
                     <DefaultButton text='Zurueck' /> 
                 </Link>
                 <DefaultButton text='Speichern' onClick={this._saveDistribution}/>
-                <DefaultButton text='Test' onClick={this.test}/>
             </div>
-            
-            
-            
         </div >
         );
     }

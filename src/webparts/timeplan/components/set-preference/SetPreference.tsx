@@ -196,11 +196,6 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
     }
   }
 
-  private _test = () => {
-    console.log(this.state);
-  }
-
-
   private _setAppointmentColumnNames():IColumn[] {
       let columns:IColumn[] = [{
         key: 'column1',
@@ -254,7 +249,6 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
                   <DefaultButton text='Zurueck' /> 
               </Link>
               <DefaultButton text='Speichern' onClick={this._savePreferences} />
-              <DefaultButton text='Test' onClick={this._test} />
           </div>
       </div >
       );
