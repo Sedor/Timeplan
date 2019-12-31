@@ -8,9 +8,11 @@ import { Meeting } from '../../data/Meeting/Meeting';
 import { Appointment } from '../../data/Appointment/Appointment';
 import { AppointmentService } from '../../service/Appointment-Service';
 import { PermissionService } from '../../service/Permission-Service';
-import { ListService } from '../../../../../lib/webparts/timeplan/service/List-Service';
-import { DistributionService } from '../../../../../lib/webparts/timeplan/service/Distribution-Service';
+import { ListService } from '../../service/List-Service';
+import { DistributionService } from '../../service/Distribution-Service';
 import { User } from '../../data/User/User';
+import { CalendarService } from '../../service/Calendar-Service';
+import { SPEvent } from '../../data/SPEvent/SPEvent';
 
 const initialState: IAddMeetingPageState = {
     event: {
@@ -101,7 +103,7 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
     }
     
     public TestGetPrio(){
-        DistributionService.getPriorityListForAppointmentList([35,34], 3);
+        // DistributionService.getPriorityListForAppointmentList([35,34], 3);
     }
 
     public testBatchGetChoice(){
@@ -109,6 +111,20 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
         console.log(DistributionService.getChoiceListOfInvitedUserList([new User({sharepointId: 86}),new User({sharepointId: 87}) ]));
 
     }
+
+    public testEventget(){
+        console.log('testEventget');
+        console.log(CalendarService.getEvents());
+    }
+
+    public testEventAdd(){
+        console.log('testEventAdd');
+        CalendarService.addEvent(new SPEvent({
+            description:'This is to test a description',
+            title:'new Testing Title'
+        }))
+    }
+
 
     public render(): React.ReactElement<IAddMeetingPageProps> {
         return(
@@ -155,6 +171,12 @@ export class AddMeetingPage extends React.Component < any, IAddMeetingPageState 
             </div>
             <div>
                 <button onClick={this.testBatchGetChoice}>Test batch get userChoice</button>
+            </div>
+            <div>
+                <button onClick={this.testEventget}>Test Events</button>
+            </div>
+            <div>
+                <button onClick={this.testEventAdd}>Test Events Adding</button>
             </div>
         </div >
         );

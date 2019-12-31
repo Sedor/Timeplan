@@ -74,7 +74,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     componentDidMount(){
-        window.addEventListener("beforeunload", this._handleWindowBeforeUnload);
+        window.addEventListener('beforeunload', this._handleWindowBeforeUnload);
         console.log('componentDidMount()');
         if(this.props.location.state !== undefined){
             if(this.props.location.state.selectedMeeting !== undefined){
@@ -99,7 +99,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     componentWillUnmount(){
         console.log('componentWillUnmount');
-        window.removeEventListener("beforeunload", this._handleWindowBeforeUnload);
+        window.removeEventListener('beforeunload', this._handleWindowBeforeUnload);
     }
 
     private _handleWindowBeforeUnload = (ev: BeforeUnloadEvent):void => {
@@ -436,7 +436,7 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                         <Dropdown
                             required
                             label='Verteilalgorithmus:'
-                            placeHolder="Verteilalgo auswaehlen"
+                            placeHolder='Verteilalgo auswaehlen'
                             onChanged={this._onDropdownChange}
                             selectedKey={DistributionNames[this.state.meeting.distribution]}
                             options={this._generatedDropdownOptions}
@@ -472,9 +472,9 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 </div>
                 <div>
                     <Toggle 
-                      label="Veranstaltung freigeben?" 
-                      onText="Ja" 
-                      offText="Nein"
+                      label='Veranstaltung freigeben?' 
+                      onText='Ja' 
+                      offText='Nein'
                       checked= { this.state.meeting.getStatus() === MeetingStatus.OPEN }
                       onChanged={this._onReleaseChange} 
                     />
@@ -498,8 +498,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
               isBlocking={true}
               >
               <DialogFooter>
-                  <PrimaryButton onClick={this._deleteMeeting} text="Loeschen" />
-                  <DefaultButton onClick={this._closeAreUSureDialog} text="Abbrechen" />
+                  <PrimaryButton onClick={this._deleteMeeting} text='Loeschen' />
+                  <DefaultButton onClick={this._closeAreUSureDialog} text='Abbrechen' />
               </DialogFooter>
               </Dialog>
             <Modal

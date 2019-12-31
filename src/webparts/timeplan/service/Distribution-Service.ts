@@ -1,17 +1,19 @@
-import { DistributionNames } from "../data/Distributions/DistributionNames";
-import { Fifo } from "../data/Distributions/Fifo/Fifo";
-import { FairDistribution } from "../data/Distributions/FairDistribution/FairDistribution";
-import { ManuelDistribution } from "../data/Distributions/ManuelDistribution/ManuelDistribution";
+import { DistributionNames } from '../data/Distributions/DistributionNames';
+import { Fifo } from '../data/Distributions/Fifo/Fifo';
+import { FairDistribution } from '../data/Distributions/FairDistribution/FairDistribution';
+import { ManuelDistribution } from '../data/Distributions/ManuelDistribution/ManuelDistribution';
 
-import { sp, ItemAddResult , ItemUpdateResult} from "@pnp/sp";
-import { Priority } from "../data/Distributions/FairDistribution/Priority";
-import { Choice } from "../data/Distributions/Choise";
-import { User } from "../data/User/User";
+import { sp, ItemAddResult , ItemUpdateResult} from '@pnp/sp';
+import { Priority } from '../data/Distributions/FairDistribution/Priority';
+import { Choice } from '../data/Distributions/Choise';
+import { User } from '../data/User/User';
+import { Appointment } from '../data/Appointment/Appointment';
+import { IDistribution } from '../data/Distributions/Distribution';
 
 export class DistributionService {
 
-  static readonly priorityListName: string = "PriorityList";
-  static readonly invitedUserChoiseListName: string = "ChoiceList";
+  static readonly priorityListName: string = 'PriorityList';
+  static readonly invitedUserChoiseListName: string = 'ChoiceList';
 
 
   public static getDistributionDescription(distributionName: DistributionNames): string {
@@ -26,34 +28,48 @@ export class DistributionService {
         return new ManuelDistribution().getDistributionDescription();
       }
       default: {
-        return "There was no Description for this DistributionType";
+        return 'There was no Description for this DistributionType';
       }
     }
   }
 
-  public static async getPriorityListForAppointmentList(appointmantIdList: number[], userId: number) {
-    console.log("DistributionService.getPriorityMapForAppointmentList()");
-    let promiseArray: Promise<Priority>[] = appointmantIdList.map((appointmentId: number) => {  
+  public static async getPriorityListForUserList(userList:User[]){
+    console.log('DistributionService.getPriorityListForAppointmentList()');
+    let promiseArray: Promise<Priority>[] = userList.map((user: User) => {  
       return sp.web.lists.getByTitle(this.priorityListName).items
-        .filter(`foreignUserId eq ${userId} and foreignAppointmentId eq ${appointmentId}`)
-        .get().then((prio:any) => {
-          if(prio.length>0){
+        .filter(`foreignUserId eq ${user.getSharepointId()}`)
+        .get().then((prioList:any) => {
+          return prioList.map(prio => {
             return new Priority({
-              sharepointId: prio[0].Id,
-              invitedUserSharepointId: userId,
-              appointmentSharePointId: appointmentId,
-              priorityNumber: prio[0].priority
+              sharepointId: prio.Id,
+              invitedUserSharepointId: user.getSharepointId(),
+              appointmentSharePointId: prio.foreignAppointmentId,
+              priorityNumber: prio.priority
             });
-          }else {
-            return new Priority({
-              invitedUserSharepointId: userId,
-              appointmentSharePointId: appointmentId,
-              priorityNumber: 1
-            });
-          }
+          })
       });
     });
     return await Promise.all(promiseArray);
+  }
+
+  public static async getPriorityListForUser(user: User):Promise<Priority[]> {
+    console.log('DistributionService.getPriorityMapForAppointmentList()');  
+    return sp.web.lists.getByTitle(this.priorityListName).items
+      .filter(`foreignUserId eq ${user.getSharepointId()}`)
+      .get().then((prioList:any) => {
+        if(prioList.length > 0){
+          return prioList.map(prio => {
+            return new Priority({
+              sharepointId: prio.Id,
+              invitedUserSharepointId: user.getSharepointId(),
+              appointmentSharePointId: prio.foreignAppointmentId,
+              priorityNumber: prio.priority
+            });
+          });
+        } else {
+          return undefined
+        }
+    });
   }
 
 
@@ -99,7 +115,7 @@ export class DistributionService {
             return new Choice({
               sharepointId: choice[0].Id,
               appointmentSharepointId: choice[0].foreignAppointmentId,
-              invitedUserSharepointId:  choice[0].foreignInvitedUserId
+              invitedUserSharepointId: choice[0].foreignInvitedUserId
             });
           }
         })
@@ -111,7 +127,7 @@ export class DistributionService {
     console.log('DistributionService.addChoiseOfInvitedUser()');
     return await sp.web.lists.getByTitle(this.invitedUserChoiseListName).items.filter(`foreignInvitedUserId eq ${userId}`).get().then(choice => {
       if(choice.length === 1){
-        return new Choice({
+        return new Choice({ 
           sharepointId: choice[0].Id,
           appointmentSharepointId: choice[0].foreignAppointmentId,
           invitedUserSharepointId:  choice[0].foreignInvitedUserId
@@ -120,6 +136,36 @@ export class DistributionService {
       return undefined;
     });
   }
+
+  // DistributionService.distribute(this.state.meeting, this.state.invitedUserList, this.state.appointmentList, this.state.priorityList);
+  public static distribute(distributionAlgo: IDistribution, invitedUserList:User[], appointmentList:Appointment[], priorityList:Priority[]){   
+    return distributionAlgo.distribute(invitedUserList, appointmentList, priorityList)
+  }
+
+  public static async batchAddChoiceList(choiceList:Choice[]){
+    console.log('Service.batchAddChoiceList()');
+    let batch = sp.web.createBatch();
+    choiceList.forEach((choice:Choice)=>{
+        sp.web.lists.getByTitle(this.invitedUserChoiseListName).items.inBatch(batch).add({
+          foreignInvitedUserId: choice.getInvitedUserSharepointId(),
+          foreignAppointmentId: choice.getAppointmentSharepointId()
+        });
+    });
+    return await batch.execute();
+  }
+
+  public static async batchUpdateChoiceList(choiceList:Choice[]){
+    console.log('Service.batchUpdateChoiceList()');
+    let batch = sp.web.createBatch();
+    choiceList.forEach((choice:Choice)=>{
+        sp.web.lists.getByTitle(this.invitedUserChoiseListName).items.inBatch(batch).getById(choice.getSharepointId()).update({
+          foreignInvitedUserId: choice.getInvitedUserSharepointId(),
+          foreignAppointmentId: choice.getAppointmentSharepointId()
+        })
+    })
+    return await batch.execute;
+}
+
 
   public static async updateChoiceOfInvitedUser(choice:Choice){
     console.log('DistributionService.updateChoiseOfInvitedUser()');

@@ -71,6 +71,19 @@ export class Appointment {
     public getParticipant():User[]{
         return this.participants
     }
+    
+    public getAppointmentStartTime():String{
+        return this.appointmentStart;
+    }
+
+    public getAppointmentEndTime():String{
+        return this.appointmentEnd;
+    }
+
+    public getAppointmentDate():Date{
+        return this.appointmentDate;
+    }
+
 
     public removeParticipantByReference(userToRemove:User){
         console.log('Appointments.removeParticipantByReference()');

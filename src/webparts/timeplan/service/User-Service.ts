@@ -16,7 +16,6 @@ export class UserService {
         })
     }
 
-    //TODO Ask if userEmail is unique (one problem is Admin account has the same as User account)
     public static async batchSaveInvitedUsers(meetingId:number, userList: User[]){
         console.log('Service.batchSaveInvitedUsers()');
         let batch = sp.web.createBatch();
@@ -101,6 +100,8 @@ export class UserService {
             PrincipalType: PrincipalType.User,
             QueryString: search
         }).then( (peopleList:PeoplePickerEntity[]) => {
+            console.log(peopleList);
+            console.log('look here');
             return peopleList.filter((entity:PeoplePickerEntity) => {
                 return (entity.EntityData.Email);
             }).map( (entity:PeoplePickerEntity) => {

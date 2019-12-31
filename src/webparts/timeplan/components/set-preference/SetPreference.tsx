@@ -49,9 +49,7 @@ export class SetPreference extends React.Component < any, ISetPreferenceState > 
   }
 
   private _loadPriorityList = (appointmentList:Appointment[], user:User) => {
-    DistributionService.getPriorityListForAppointmentList(
-      appointmentList.map(appointment => appointment.getSharepointId()), 
-      user.getSharepointId()).then((prioList:Priority[]) => {
+    DistributionService.getPriorityListForUser(user).then((prioList:Priority[]) => {
         this.setState({
           appointmentList: this.state.appointmentList.concat([]), //just to rerender the list
           priorityList: prioList

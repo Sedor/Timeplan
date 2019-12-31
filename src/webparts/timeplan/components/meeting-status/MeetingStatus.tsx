@@ -14,6 +14,11 @@ import { IDragDropEvents, IDragDropContext } from 'office-ui-fabric-react/lib/ut
 import { UserService } from '../../service/User-Service';
 import { DistributionService } from '../../service/Distribution-Service';
 import { Choice } from '../../data/Distributions/Choise';
+import { DistributionNames } from '../../data/Distributions/DistributionNames';
+import { Priority } from '../../data/Distributions/FairDistribution/Priority';
+import { FairDistribution } from '../../data/Distributions/FairDistribution/FairDistribution';
+import { IDistribution } from '../../data/Distributions/Distribution';
+import { CalendarService } from '../../service/Calendar-Service';
 
 export class MeetingStatus extends React.Component < any, IMeetingStatusState > {
 
@@ -36,7 +41,8 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
             invitedUserList: [],
             appointmentColumns: this._setAppointmentColumnNames(),
             unassignedInvitedUsersColumns: this._setUnassignedInvitedUsersColumnNames(),
-            assignedInvitedUsersColumns: this._setAssignedInvitedUsersColumnNames()
+            assignedInvitedUsersColumns: this._setAssignedInvitedUsersColumnNames(),
+            distributionButtonVisible: false
         }
     }
 
@@ -141,9 +147,11 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       });
     }
 
-    private _preDistributePersons = (appointmentList:Appointment[], invitedUserList:User[], choiceList:Choice[]) => {
+    private _distributePersons = (appointmentList:Appointment[], invitedUserList:User[], choiceList:Choice[]) => {
       console.log('MeetingStatus._preDistributePersons()');
-      console.log(choiceList);
+      this.setState({
+        allUsers: invitedUserList
+      })
       choiceList.forEach((choice:Choice) => {
         let appointment = appointmentList.filter( (appointment:Appointment) => appointment.getSharepointId() === choice.getAppointmentSharepointId())[0];
         let invitedUser = invitedUserList.filter( (user:User) => user.getSharepointId() === choice.getInvitedUserSharepointId())[0];
@@ -157,18 +165,30 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       });
     }
 
+    private _setDistributionButtonVisibility(visible:boolean){
+      this.setState({
+        distributionButtonVisible: visible
+      })
+    }
+
     componentDidMount(){
       console.log('MeetingStatus.componentDidMount()');  
       window.addEventListener("beforeunload", this._handleWindowBeforeUnload);
       if(this.props.location.state !== undefined){
           if(this.props.location.state.selectedMeeting !== undefined){
               let meeting:Meeting = (this.props.location.state.selectedMeeting as Meeting);
+              this._setDistributionButtonVisibility(!(meeting.getDistribution() === DistributionNames.FIFO));
               AppointmentService.getAppointmentListForMeetingId(meeting.getSharepointPrimaryId()).then(appointmentList =>{
                 UserService.getInvitedUserListForMeetingId(meeting.getSharepointPrimaryId()).then(invitedUserList => {
                   DistributionService.getChoiceListOfInvitedUserList(invitedUserList).then( choiceList => {
                     choiceList = choiceList.filter( choice => choice !== undefined);
-                    this._preDistributePersons(appointmentList, invitedUserList, choiceList);
+                    this._distributePersons(appointmentList, invitedUserList, choiceList);
                   });
+                  DistributionService.getPriorityListForUserList(invitedUserList).then( (priorityList:Priority[]) => {
+                    this.setState({
+                      priorityList: priorityList
+                    })
+                  })
                 });
               });
             this.setState({
@@ -188,15 +208,51 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
         ev.returnValue = 'Aenderungen sind noch nicht gespeichert. Wirklich die Seite verlassen?';
     }
 
-    private _saveDistribution = () => {
-        console.log('MeetingStatus._saveDistribution()');
-        console.log(this.state);
+    private _generateChoiceList():Choice[]{
+      console.log("MeetingStatus._generateChoiceList()");
+
+      let newChoiceList:Choice[] = [];
+      this.state.appointmentList.forEach( appointment => {
+         newChoiceList = newChoiceList.concat(appointment.getParticipant().map( (user:User) => {
+            return new Choice({
+              appointmentSharepointId: appointment.getSharepointId(),
+              invitedUserSharepointId: user.getSharepointId(),
+          });
+        }));
+      });
+
+      this.state.choiceList.forEach( (oldChoice:Choice) => {
+        newChoiceList.forEach( (newChoice:Choice) => {
+          if (newChoice.getInvitedUserSharepointId() === oldChoice.getInvitedUserSharepointId()){
+            newChoice.setSharepointId(oldChoice.getSharepointId());
+          }
+        })
+      })
+      return newChoiceList;
     }
+
+
+    private _saveDistribution = () => {
+      console.log('MeetingStatus._saveDistribution()');
+      let newChoiceList:Choice[] = this._generateChoiceList();
+      DistributionService.batchUpdateChoiceList(newChoiceList.filter((choice:Choice) => choice.getSharepointId())).then( _ => {
+        DistributionService.batchAddChoiceList(newChoiceList.filter((choice:Choice) => (!choice.getSharepointId()))).then( (_:void) => { 
+          DistributionService.getChoiceListOfInvitedUserList(this.state.allUsers).then( (choiceList:Choice[]) => {
+            this.setState({
+              choiceList: choiceList
+            });
+          });
+        });
+      });
+      CalendarService.addEventsWithAppointmentList(this.state.meeting.getTitle(), this.state.appointmentList);
+    }
+
+    // distribute: (userList:User[] , AppointmentList:Appointment[], PriorityList:Priority[]) => Choice[]
 
     private _distribute = () => {
       console.log('MeetingStatus.verteilen()');
-      alert('start distributiong !');
-      //TODO do this
+      // let algo = new FairDistribution();
+      let prioList = DistributionService.distribute(new FairDistribution(), this.state.invitedUserList, this.state.appointmentList, this.state.priorityList);
     }
 
     private _setAppointmentColumnNames():IColumn[] {
@@ -295,6 +351,23 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
       return columns;
     }
     
+    private _testing = (event: any): void => {
+      console.log('blub');
+
+        if ((event.target as HTMLInputElement).files && (event.target as HTMLInputElement).files.length) {
+          let file:File = (event.target as HTMLInputElement).files[0];
+          console.log(file);
+          let reader = new FileReader();
+          reader.onload = () => {
+              // this 'text' is the content of the file
+              var text = reader.result;
+              console.log('look here');
+              console.log(text);
+          }
+          reader.readAsText(file);
+        }
+    }
+
 
     public test = () => {
       console.log(this.state);
@@ -317,16 +390,21 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
             <div>
               <h2>Unverteilte Benutzer</h2>
               <DetailsList
-              items={this.state.invitedUserList}
+              items={this.state.invitedUserList }
               columns={this.state.unassignedInvitedUsersColumns}
               selection={this._unassignedInvitedUsersSelection}
               dragDropEvents={this._dragDropEvents}
               checkboxVisibility={CheckboxVisibility.hidden}
               />
             </div> 
+            {this.state.distributionButtonVisible ? 
             <div>
               <DefaultButton text='Verteilen' onClick={this._distribute}/>
+              <DefaultButton> <input type='file' name="Algorithmus Laden" accept='.txt' onChange={this._testing}/> </DefaultButton>
             </div>
+            :
+            <div/>
+            }
             <div>
                 <Link to='/'>
                     <DefaultButton text='Zurueck' /> 
@@ -335,7 +413,7 @@ export class MeetingStatus extends React.Component < any, IMeetingStatusState > 
                 <DefaultButton text='Test' onClick={this.test}/>
             </div>
             
-              
+            
             
         </div >
         );

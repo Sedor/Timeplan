@@ -1,5 +1,8 @@
 import { IDistribution } from '../Distribution';
 import { DistributionNames } from '../DistributionNames';
+import { User } from '../../User/User';
+import { Appointment } from '../../Appointment/Appointment';
+import { Priority } from '../FairDistribution/Priority';
 
 export class ManuelDistribution implements IDistribution {
 
@@ -10,12 +13,15 @@ export class ManuelDistribution implements IDistribution {
         this.distributionName = DistributionNames.MANUEL,
         this.distributionDescription = "This is Manuel Distribution" 
     }
+    
+    distribute = (userList:User[] , appointmentList:Appointment[], priorityList:Priority[]) => {
+        console.log('loook here mum');
+        console.log(userList);
+        console.log(appointmentList);
+        console.log(priorityList);
 
-    distribute = (text: string, aNumber: number) => {
-        console.log('ManualDistribution.distribute');
-        console.log(text);
-        console.log(aNumber);
-        return true
+
+        return undefined;
     };
  
 

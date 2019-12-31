@@ -56,4 +56,8 @@ export class Meeting{
         return this.status;
     }
 
+    public getDistribution():DistributionNames{
+        return this.distribution
+    }
+
 }

@@ -1,9 +1,13 @@
-import { DistributionNames } from "./DistributionNames";
+import { DistributionNames } from './DistributionNames';
+import { Appointment } from '../Appointment/Appointment';
+import { User } from '../User/User';
+import { Choice } from './Choise';
+import { Priority } from './FairDistribution/Priority';
 
 export interface IDistribution{
     distributionName: DistributionNames,
     distributionDescription?: string,
-    distribute: (text:string,aNumber:number) => boolean
+    distribute: (userList:User[] , AppointmentList:Appointment[], PriorityList:Priority[]) => Choice[]
 }
 
 export class Distribution{
