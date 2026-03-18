@@ -30,7 +30,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     constructor(props: any){
         super(props);
-        console.log('CreateMeeting.Constructor()');
         this.state = {
             userColumns: this._setUserColumnNames(),
             appointmentColumns: this._setAppointmentColumnNames(),
@@ -50,7 +49,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     private _initializeAppointmentSelection = ():void => {
         this._appointmentSelection = new Selection({
           onSelectionChanged: () => {
-            console.log('onAppointmentSelectionChanged()');
             if(!((this._appointmentSelection.getSelection()[0] as Appointment) === undefined)){
                 this.setState({
                     selectedAppointment: (this._appointmentSelection.getSelection()[0] as Appointment),
@@ -63,7 +61,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     private _initializeUserSelection = ():void => {
         this._userSelection = new Selection({
           onSelectionChanged: () => {
-             console.log('onUserSelectionChanged()');
              if(!((this._userSelection.getSelection()[0] as User) === undefined)){
                 this.setState({
                     selectedUser: (this._userSelection.getSelection()[0] as User),
@@ -75,7 +72,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
     componentDidMount(){
         window.addEventListener('beforeunload', this._handleWindowBeforeUnload);
-        console.log('componentDidMount()');
         if(this.props.location.state !== undefined){
             if(this.props.location.state.selectedMeeting !== undefined){
                 let meetingToUpgrade:Meeting = (this.props.location.state.selectedMeeting as Meeting);
@@ -98,26 +94,22 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     componentWillUnmount(){
-        console.log('componentWillUnmount');
         window.removeEventListener('beforeunload', this._handleWindowBeforeUnload);
     }
 
     private _handleWindowBeforeUnload = (ev: BeforeUnloadEvent):void => {
-        console.log('_handleWindowBeforeUnload');
         ev.returnValue = 'Aenderungen sind noch nicht gespeichert. Wirklich die Seite verlassen?';
     }
 
     public createNewAppointment = ():void => {
-        console.log('clicked CreateNewAppointment');
         this.setState({
             showAppointmentModal: true,
         })
     }
 
     public modifyAppointment = ():void => {
-        console.log('CreateMeeting.modifyAppointment()');
         if(this.state.selectedAppointment === undefined || this.state.selectedAppointment === null){
-            alert('You didnt select an Appointment'); // TODO remove
+            this.setState({ showErrorDialog: true, errorDialogMessage: 'Bitte waehlen Sie einen Termin aus.' });
         }else {
             this.setState({
                 appointmentIsUpdating: true,
@@ -140,9 +132,8 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _deleteAppointment = ():void => {
-        console.log('CreateMeeting.deleteAppointment()');
         if(this.state.selectedAppointment === undefined || this.state.selectedAppointment === null){
-            alert('You didnt select an Appointment'); // TODO remove
+            this.setState({ showErrorDialog: true, errorDialogMessage: 'Bitte waehlen Sie einen Termin aus.' });
         }else{
             let toRemoveAppointment = this.state.selectedAppointment;
             let tmpAppointmentList: Appointment[] = this.state.appointmentList.filter(obj => obj !== toRemoveAppointment);
@@ -156,20 +147,17 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 selectedAppointment: undefined,
             });
         }
-        console.log(this._appointmentSelection.getSelection());
     }
 
     public inviteUser = ():void => {
-        console.log('inviteUser()');
         this.setState({
             showUserModal:true,
         })
     }
 
     public deleteInvitedUser = ():void => {
-        console.log('CreateMeeting.deleteInvitedUser()');
         if(this.state.selectedUser === undefined || this.state.selectedUser === null){
-            alert('You didnt select an User'); // TODO remove
+            this.setState({ showErrorDialog: true, errorDialogMessage: 'Bitte waehlen Sie einen Benutzer aus.' });
         } else {
             let toRemoveUser = this.state.selectedUser;
             let tmpInvitedUserList:User[] = this.state.invitedUserList.filter(obj => obj !== toRemoveUser);
@@ -186,7 +174,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _saveMeeting = ():void => {
-        console.log('Saving Meeting');
         if(this.state.isUpdate){
             this._saveUpdatedMeeting();
         } else {
@@ -196,16 +183,13 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _saveNewMeeting = () => {
-        console.log('CreateMeeting._saveNewMeeting()');
         try {
             MeetingService.saveMeeting(this.state.meeting).then((meetingId:number)=> {
                 this._saveAppointments(meetingId, this.state.appointmentList);
                 this._saveInvitedUsers(meetingId, this.state.invitedUserList);
             });
         } catch (error) {
-            console.log('boooom');
-            console.log(error);
-            alert('saving new Meeting went wrong');
+            this.setState({ showErrorDialog: true, errorDialogMessage: 'Das Speichern der Veranstaltung ist fehlgeschlagen.' });
         }
     }
 
@@ -232,7 +216,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _saveUpdatedMeeting = () => {
-        console.log('CreateMeeting._saveUpdatedMeeting()');
         try {
             MeetingService.updateMeeting(this.state.meeting).then(()=> {
                 AppointmentService.batchDeleteAppointments(this.state.appointmentDeletionList);
@@ -241,12 +224,11 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
                 this._saveInvitedUsers(this.state.meeting.sharepointPrimaryId, this.state.invitedUserList);
             });
         } catch (error) {
-            console.log(error);
+            this.setState({ showErrorDialog: true, errorDialogMessage: 'Das Aktualisieren der Veranstaltung ist fehlgeschlagen.' });
         }
     }
 
     private _onReleaseChange = (checked: boolean):void => {
-      console.log('_onReleaseChange:');
       if(checked){
         this.state.meeting.setStatus(MeetingStatus.OPEN);
       } else {
@@ -272,8 +254,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _onDropdownChange = (item: IDropdownOption): void => {
-        console.log('_onDropdownChange()'); //TODO remove
-        console.log(item.key);
         this.state.meeting.distribution = DistributionNames[item.key];
         this.setState({
             meeting: this.state.meeting,
@@ -289,12 +269,14 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     };
 
     private _closeAreUSureDialog = (): void => {
-        console.log('_closeAreUSureDialog()');
         this.setState({ showAreUSureDialog: false});
     }
 
+    private _closeErrorDialog = (): void => {
+        this.setState({ showErrorDialog: false, errorDialogMessage: undefined });
+    }
+
     private _addAppointment = (appointment:Appointment): void => {
-        console.log('CreateMeeting._addAppointment()');
         let newAppointmentList = this.state.appointmentList.concat([appointment]);
         this.setState({
             appointmentList: newAppointmentList,
@@ -302,7 +284,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _updateAppointment = (appointmentReference:Appointment, updatedAppointment:Appointment) => {
-        console.log('CreateMeeting._updateAppointment()');
         appointmentReference.appointmentDate = new Date(updatedAppointment.appointmentDate.getTime());
         appointmentReference.appointmentEnd = updatedAppointment.appointmentEnd;
         appointmentReference.appointmentStart = updatedAppointment.appointmentStart;
@@ -315,14 +296,12 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
 
 
     private _deleteMeetingButton = (): void => {
-        console.log('_deleteMeetingButton()');
         this.setState({
             showAreUSureDialog: true,
         });
     }
 
     private _deleteMeeting = (): void => {
-        console.log('_deleteMeeting()');
         this.setState({
             showAreUSureDialog: false,
         });
@@ -331,7 +310,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
     
     private _addUser = (userList:User[]) => {
-        console.log('CreateMeeting._addUser()');
         this._closeUserModal();
         let newUsers:User[] = userList.filter(user => {
             return this.state.invitedUserList.filter(obj => user.getName() === obj.getName()).length === 0;
@@ -342,7 +320,6 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
     }
 
     private _generateDistributionDropdownOptions = ():IDropdownOption[] => {
-        console.log('_generateDistributionDropdownOptions()');
         let dropdownOptions:IDropdownOption[] = [];
         for (let item in DistributionNames){
             if(!(dropdownOptions.some(e => e.text === item))){
@@ -495,6 +472,16 @@ export class CreateMeeting extends React.Component < any, IMeetingState > {
               <DialogFooter>
                   <PrimaryButton onClick={this._deleteMeeting} text='Loeschen' />
                   <DefaultButton onClick={this._closeAreUSureDialog} text='Abbrechen' />
+              </DialogFooter>
+              </Dialog>
+            <Dialog
+              isOpen={this.state.showErrorDialog}
+              onDismiss={this._closeErrorDialog}
+              dialogContentProps={{ type: DialogType.normal, title: 'Hinweis', subText: this.state.errorDialogMessage }}
+              isBlocking={false}
+              >
+              <DialogFooter>
+                  <DefaultButton onClick={this._closeErrorDialog} text='OK' />
               </DialogFooter>
               </Dialog>
             <Modal
