@@ -17,6 +17,7 @@ const DayPickerStrings: IDatePickerStrings = {
     invalidInputErrorMessage: 'Falsches Datumsformat.'
   };
 
+const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 export class CreateAppointment extends React.Component < ICreateAppointmentProps, ICreateAppointmentState > {
 
@@ -29,16 +30,14 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
     }
 
     private _onSelectDate = (date: Date | null | undefined) => {
-        this.setState({ meetingDate: date });
+        this.setState({ meetingDate: date, dateError: undefined });
     };
 
     private _onFormatDate = (date: Date):string => {
-        console.log('in _onFormatDate');
         return date.getDate() + '.' + (date.getMonth() + 1) + '.' + (date.getFullYear()); // TT.MM.JJJJ
     };
 
     private _onParseDateFromString = (value: string):Date => {
-        console.log('in _onParseDateFromString');
         const date = this.state.meetingDate || new Date();
         const values = (value || '').trim().split('.');
         const day = values.length > 0 ? Math.max(1, Math.min(31, parseInt(values[0], 10))) : date.getDate();
@@ -51,7 +50,6 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
     };
 
     componentDidMount(){
-        console.log('CreateAppointment.componentDidMount()');
         if(this.props.isUpdate){
             this.setState({
                 from: this.props.appointmentToEdit.appointmentStart,
@@ -66,24 +64,41 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
     private _onFromInputChange = (from:string) => {
         this.setState({
             from: from,
-        })
+            fromError: TIME_PATTERN.test(from) ? undefined : 'Bitte eine gueltige Uhrzeit eingeben (HH:MM).',
+        });
     }
 
     private _onUntilInputChange = (until:string) => {
         this.setState({
             until: until,
-        })
+            untilError: TIME_PATTERN.test(until) ? undefined : 'Bitte eine gueltige Uhrzeit eingeben (HH:MM).',
+        });
     }
 
     private _onPersonInputChange = (person:string) => {
+        const parsed = parseInt(person, 10);
         this.setState({
-            persons: parseInt(person),
-        })
+            persons: isNaN(parsed) ? undefined : parsed,
+            personsError: (!person || isNaN(parsed) || parsed < 1) ? 'Bitte eine positive Zahl eingeben.' : undefined,
+        });
+    }
+
+    private _validate = (): boolean => {
+        const dateError = !this.state.meetingDate ? 'Bitte ein Datum auswaehlen.' : undefined;
+        const fromError = !this.state.from || !TIME_PATTERN.test(this.state.from)
+            ? 'Bitte eine gueltige Uhrzeit eingeben (HH:MM).' : undefined;
+        const untilError = !this.state.until || !TIME_PATTERN.test(this.state.until)
+            ? 'Bitte eine gueltige Uhrzeit eingeben (HH:MM).' : undefined;
+        const personsError = (!this.state.persons || this.state.persons < 1)
+            ? 'Bitte eine positive Zahl eingeben.' : undefined;
+        this.setState({ dateError, fromError, untilError, personsError });
+        return !dateError && !fromError && !untilError && !personsError;
     }
 
     private _saveAppointmentToList = () => {
-        console.log('CreateAppointment._saveAppointmentToList()');
-        //TODO input verification
+        if (!this._validate()) {
+            return;
+        }
         let newAppointment= new Appointment({
             appointmentDate: this.state.meetingDate,
             appointmentStart: this.state.from,
@@ -91,20 +106,11 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
             personCount: this.state.persons,
         });
         if(this.props.isUpdate){
-            console.log('updating');
             this.props.updateAppointment(this.props.appointmentToEdit,newAppointment); 
         }else{
-            console.log('just adding');
             this.props.addAppointmentToList(newAppointment);
         }
         this.props.closeCreateAppointmentModal();
-    }
-
-    private _onNotifyValidationResult = (errorMessage: string, value: string) => {
-        console.log('_onNotifyValidationResult for Person');
-        console.log(errorMessage);
-        console.log(value);
-        //TODO validate Persons
     }
 
     public render(): React.ReactElement<ICreateAppointmentProps> {
@@ -114,7 +120,7 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
                     <h1>Termin Erstellen</h1>
                         <DatePicker
                             label="Datum"
-                            isRequired={false}
+                            isRequired={true}
                             allowTextInput={true}
                             disableAutoFocus={false}
                             placeholder='TT.MM.YYYY'
@@ -127,19 +133,19 @@ export class CreateAppointment extends React.Component < ICreateAppointmentProps
                             formatDate={this._onFormatDate}
                             parseDateFromString={this._onParseDateFromString}
                         />
+                        {this.state.dateError && <span style={{ color: 'rgb(168, 0, 0)', fontSize: '12px' }}>{this.state.dateError}</span>}
                         <div>
-                            <TextField label='Von:' placeholder='HH:MM' value={this.state.from} onChanged={this._onFromInputChange} required/>
-                            <TextField label='Bis:' placeholder='HH:MM' value={this.state.until} onChanged={this._onUntilInputChange} required/>
+                            <TextField label='Von:' placeholder='HH:MM' value={this.state.from} onChanged={this._onFromInputChange} required errorMessage={this.state.fromError}/>
+                            <TextField label='Bis:' placeholder='HH:MM' value={this.state.until} onChanged={this._onUntilInputChange} required errorMessage={this.state.untilError}/>
                         </div>
                         <div>
                             <TextField  
                                 label='Personen:' 
-                                placeholder=''
-                                defaultValue='1'
-                                value={String(this.state.persons)}
+                                placeholder='1'
+                                value={this.state.persons !== undefined ? String(this.state.persons) : ''}
                                 onChanged={this._onPersonInputChange} 
-                                onNotifyValidationResult={this._onNotifyValidationResult}
                                 required
+                                errorMessage={this.state.personsError}
                             />
                         </div>
                     <div>

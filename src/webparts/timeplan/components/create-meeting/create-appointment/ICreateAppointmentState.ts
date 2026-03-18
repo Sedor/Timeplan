@@ -5,4 +5,8 @@ export interface ICreateAppointmentState{
     until?: string,
     persons?: number,
     meetingDate?: Date | null;
+    dateError?: string;
+    fromError?: string;
+    untilError?: string;
+    personsError?: string;
 }

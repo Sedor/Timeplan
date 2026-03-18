@@ -19,4 +19,6 @@ export interface IMeetingState{
     showAppointmentModal?:boolean,
     showUserModal?:boolean,
     appointmentIsUpdating?:boolean,
+    showErrorDialog?: boolean,
+    errorDialogMessage?: string,
 }
